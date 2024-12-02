@@ -1,6 +1,9 @@
 import gleam/dict
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/regex
+import gleam/string
+import simplifile
 
 fn increment(x: Option(Int)) -> Int {
   case x {
