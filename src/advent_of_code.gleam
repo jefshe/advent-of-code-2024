@@ -1,4 +1,4 @@
-import day2/main
+import day3/main
 
 pub fn main() {
   main.run()
