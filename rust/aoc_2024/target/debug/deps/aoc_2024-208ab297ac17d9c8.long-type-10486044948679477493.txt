@@ -1,1 +1,0 @@
-FlatMap<FlatMap<FlatMap<std::slice::Iter<'_, Rect>, Vec<Rect>, {closure@src/main.rs:179:19: 179:25}>, Vec<Rect>, {closure@src/main.rs:185:19: 185:25}>, Vec<Rect>, {closure@src/main.rs:191:19: 191:25}>
