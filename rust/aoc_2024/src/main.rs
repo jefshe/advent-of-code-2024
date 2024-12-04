@@ -17,7 +17,7 @@ use ratatui::{
 };
 
 pub mod days;
-use crate::days::{Day4, Day};
+use crate::days::*;
 
 const TODO_HEADER_STYLE: Style = Style::new().fg(SLATE.c100).bg(BLUE.c800);
 const NORMAL_ROW_BG: Color = SLATE.c950;
@@ -50,46 +50,34 @@ struct AOCList {
     state: ListState,
 }
 
-#[derive(Debug)]
 struct AOCDay {
     title: String,
-    day: Option<Box<dyn Day>>,
+    day: Box<dyn Day>,
 }
 
 impl Default for App {
     fn default() -> Self {
         Self {
             should_exit: false,
-            aoc_list: AOCList::from_iter([
-                ("Day 4", Day4::new()),
-                ("Day 5", None),
-                ("Day 6", None),
-                ("Day 7", None),
-                ("Day 8", None),
-                ("Day 9", None),
-                ("Day 10", None),
-                ("Day 11", None),
-            ]),
+            aoc_list: AOCList {
+                items: vec![
+                    AOCDay::new("Day 4", Box::new(Day4::new())),
+                    AOCDay::new("Day 5", Box::new(Day4::new())),
+                    AOCDay::new("Day 6", Box::new(Day4::new())),
+                    AOCDay::new("Day 7", Box::new(Day4::new())),
+                    AOCDay::new("Day 8", Box::new(Day4::new())),
+                ],
+                state: ListState::default(),
+            },
         }
     }
 }
 
-impl FromIterator<(&'static str, &'static str)> for AOCList {
-    fn from_iter<I: IntoIterator<Item = (&'static str, &'static dyn Day)>>(iter: I) -> Self {
-        let items = iter
-            .into_iter()
-            .map(|(title, day)| AOCDay::new(title, day))
-            .collect();
-        let state = ListState::default();
-        Self { items, state }
-    }
-}
-
 impl AOCDay {
-    fn new(title: &str, day: Option<Box<dyn Day>>) -> Self {
+    fn new(title: &str, day: Box<dyn Day>) -> Self {
         Self {
             title: title.to_string(),
-            day: day,
+            day,
         }
     }
 }
@@ -124,8 +112,7 @@ impl App {
     }
 
     /// Changes the status of the selected list item
-    fn run_exercise(&mut self) {
-    }
+    fn run_exercise(&mut self) {}
 
     fn select_none(&mut self) {
         self.aoc_list.state.select(None);
@@ -214,9 +201,6 @@ impl App {
     }
 
     fn render_selected_item(&self, area: Rect, buf: &mut Buffer) {
-        // We get the info depending on the item's state.
-        // let info = if let Some(i) = self.aoc_list.state.selected()
-
         // We show the list item's info under the list in this paragraph
         let block = Block::new()
             .title(Line::raw("Extra Info").centered())
@@ -226,12 +210,24 @@ impl App {
             .bg(NORMAL_ROW_BG)
             .padding(Padding::horizontal(1));
 
-        // We can now render the item info
-        Paragraph::new("")
+        if let Some(i) = self.aoc_list.state.selected() {
+            let answer = self.aoc_list.items[i].day.run();
+            Paragraph::new(vec![
+                Line::styled(
+                    format!("Part A: {}", &answer.parta.unwrap_or("NA".into())),
+                    TEXT_FG_COLOR,
+                ),
+                Line::styled(
+                    format!("Part B: {}", &answer.partb.unwrap_or("NA".into())),
+                    TEXT_FG_COLOR,
+                ),
+            ])
             .block(block)
             .fg(TEXT_FG_COLOR)
             .wrap(Wrap { trim: false })
             .render(area, buf);
+        }
+        // We can now render the item info
     }
 }
 
