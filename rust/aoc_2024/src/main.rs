@@ -5,13 +5,11 @@ use ratatui::{
     crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     layout::{Constraint, Layout, Rect},
     style::{
-        palette::tailwind::{BLUE, GREEN, SLATE, YELLOW},
-        Color, Modifier, Style, Stylize,
+        Color, Stylize,
     },
-    symbols,
     text::Line,
     widgets::{
-        Block, Borders, HighlightSpacing, List, ListItem, ListState, Padding, Paragraph,
+        HighlightSpacing, List, ListItem, ListState, Paragraph,
         StatefulWidget, Widget, Wrap,
     },
     DefaultTerminal,
@@ -19,17 +17,12 @@ use ratatui::{
 
 pub mod days;
 pub mod util;
-use crate::days::*;
+pub mod gfx;
+pub mod list;
 
-const TODO_HEADER_STYLE: Style = Style::new().fg(SLATE.c100).bg(BLUE.c800);
-const NORMAL_ROW_BG: Color = SLATE.c950;
-const ALT_ROW_BG_COLOR: Color = SLATE.c900;
-const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
-const TEXT_FG_COLOR: Color = SLATE.c200;
-const COMPLETED_TEXT_FG_COLOR: Color = GREEN.c500;
-const INCOMPLETE_TEXT_FG_COLOR: Color = YELLOW.c500;
-const TOP_RATIO: u16 = 3;
-const BOTTOM_RATIO: u16 = 3;
+use crate::days::*;
+use crate::list::*;
+use crate::gfx::*;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
@@ -50,59 +43,13 @@ struct App {
     aoc_list: AOCList,
 }
 
-struct AOCList {
-    items: Vec<AOCDay>,
-    state: ListState,
-}
-
-struct AOCDay {
-    title: String,
-    day: Option<Box<dyn Day>>,
-}
-
 impl Default for App {
     fn default() -> Self {
-        let mut aoc_list = AOCList {
-            items: vec![
-                AOCDay::new("Day 4", Box::new(Day4::new())),
-                AOCDay::todo("Day 5"),
-                AOCDay::todo("Day 6"),
-                AOCDay::todo("Day 7"),
-                AOCDay::todo("Day 8"),
-                AOCDay::todo("Day 9"),
-                AOCDay::todo("Day 10"),
-                AOCDay::todo("Day 11"),
-                AOCDay::todo("Day 12"),
-                AOCDay::todo("Day 13"),
-                AOCDay::todo("Day 14"),
-                AOCDay::todo("Day 15"),
-                AOCDay::todo("Day 16"),
-                AOCDay::todo("Day 17"),
-                AOCDay::todo("Day 18"),
-                AOCDay::todo("Day 19"),
-                AOCDay::todo("Day 20"),
-            ],
-            state: ListState::default(),
-        };
+        let mut aoc_list = AOCList::default();
         aoc_list.state.select(Some(0));
         Self {
             should_exit: false,
             aoc_list,
-        }
-    }
-}
-
-impl AOCDay {
-    fn new(title: &str, day: Box<dyn Day>) -> Self {
-        Self {
-            title: title.to_string(),
-            day: Some(day),
-        }
-    }
-    fn todo(title: &str) -> Self {
-        Self {
-            title: title.to_string(),
-            day: None,
         }
     }
 }
@@ -158,6 +105,7 @@ impl App {
         self.aoc_list.state.select_last();
     }
 }
+
 impl Widget for &mut App {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let [header_area, main_area, footer_area] = Layout::vertical([
@@ -193,12 +141,7 @@ impl App {
     }
 
     fn render_list(&mut self, area: Rect, buf: &mut Buffer) {
-        let block = Block::new()
-            .title(Line::raw("Select A Day").centered())
-            .borders(Borders::TOP)
-            .border_set(symbols::border::EMPTY)
-            .border_style(TODO_HEADER_STYLE)
-            .bg(NORMAL_ROW_BG);
+        let block = block("Select A Day");
 
         // Iterate through all elements in the `items` and stylize them.
         let items: Vec<ListItem> = self
@@ -206,9 +149,9 @@ impl App {
             .items
             .iter()
             .enumerate()
-            .map(|(i, todo_item)| {
+            .map(|(i, day)| {
                 let color = alternate_colors(i);
-                ListItem::from(todo_item).bg(color)
+                ListItem::from(day).bg(color)
             })
             .collect();
 
@@ -226,13 +169,7 @@ impl App {
 
     fn render_selected_item(&self, area: Rect, viz_area: Rect, buf: &mut Buffer) {
         // We show the list item's info under the list in this paragraph
-        let block = Block::new()
-            .title(Line::raw("Answer").centered())
-            .borders(Borders::TOP)
-            .border_set(symbols::border::EMPTY)
-            .border_style(TODO_HEADER_STYLE)
-            .bg(NORMAL_ROW_BG)
-            .padding(Padding::horizontal(1));
+        let block = block("Answer");
 
         if let Some(i) = self.aoc_list.state.selected()
             && let Some(day) = &self.aoc_list.items[i].day

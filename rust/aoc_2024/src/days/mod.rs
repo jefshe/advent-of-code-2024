@@ -11,11 +11,3 @@ pub trait Day {
 }
 pub mod day04;
 pub use day04::*;
-
-pub fn render_extra(viz_area: Rect, buf: &mut Buffer) {
-    Block::new()
-        .title(Line::raw("Extra").centered())
-        .borders(Borders::TOP)
-        .border_set(symbols::border::EMPTY)
-        .padding(Padding::horizontal(1)).render(viz_area, buf);
-}

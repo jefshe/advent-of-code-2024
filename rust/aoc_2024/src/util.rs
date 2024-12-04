@@ -1,7 +1,6 @@
 use std::io::{self, BufRead};
 use std::path::{Path};
 use std::fs::File;
-
 pub fn parse_chars(day: &str) -> Vec<Vec<char>> {
     read_lines(format!("./input/{}.txt", day))
         .expect("Could not read file")
@@ -25,11 +24,13 @@ where P: AsRef<Path>, {
     Ok(io::BufReader::new(file).lines())
 }
 
+#[derive(Debug)]
 pub struct XY {
     pub x: usize,
     pub y: usize
 }
 
+#[derive(Debug)]
 pub enum D {
     Up,
     Down,
@@ -117,4 +118,10 @@ impl XY {
             y: self.y + 1
         }
     }
+}
+
+pub type Grid<T> = Vec<Vec<T>>;
+pub fn grid_get<'a, T>(grid: &'a Grid<T>, xy: &XY, dir: &D) -> &'a T {
+    let pos = xy.dir(dir);
+    &grid[pos.y][pos.x]
 }
