@@ -8,6 +8,16 @@ pub fn parse_chars(day: &str) -> Vec<Vec<char>> {
         .collect()
 }
 
+pub fn parse_2_parts(day: &str) -> (Vec<String>, Vec<String>) {
+    let mut buf = read_lines(format!("./input/{}.txt", day))
+        .expect("Could not read file")
+        .map(|line| line.expect("Could not read line"));
+    (
+        buf.by_ref().take_while(|line| line != "").collect(),
+        buf.collect(),
+    )
+}
+
 pub fn bigga<T: Clone>(vec: &Vec<Vec<T>>, by: usize, default: T) -> Vec<Vec<T>> {
     let mut new_vec = vec![vec![default; vec.len() + 2 * by]; vec.len() + 2 * by];
     for i in 0..vec.len() {
@@ -18,7 +28,7 @@ pub fn bigga<T: Clone>(vec: &Vec<Vec<T>>, by: usize, default: T) -> Vec<Vec<T>> 
     new_vec
 }
 
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
     P: AsRef<Path>,
 {

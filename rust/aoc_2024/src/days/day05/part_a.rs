@@ -1,41 +1,53 @@
-use crate::util::{bigga, parse_chars, D, XY};
+use std::collections::{HashMap, HashSet};
+
+use itertools::Itertools;
+
+use crate::util::parse_2_parts;
+
+type Rulebook = HashMap<u32, HashSet<u32>>;
+
 pub fn run() -> String {
-    let chars = parse_chars("day04");
-    let search = bigga(&chars, 1, '.');
-    let count = look_for_xmas(&search);
-    count.to_string()
+    let (rules_part, seqs_part) = parse_2_parts("day05_ex");
+    let rules: Vec<(u32, u32)> = rules_part
+        .into_iter()
+        .map(|l| {
+            l.split("|")
+                .map(|n| n.parse().unwrap())
+                .collect_tuple::<(u32, u32)>()
+        })
+        .map(|t| t.expect("Could not parse tuple"))
+        .collect();
+    let seqs: Vec<Vec<u32>> = seqs_part
+        .into_iter()
+        .map(|l| l.split(",").map(|n| n.parse().unwrap()).collect())
+        .collect();
+    println!("{:?}", seqs);
+    let rulebook: Rulebook = rules
+        .into_iter()
+        .map(|(before, after)| (after, before))
+        .into_group_map::<u32, u32>()
+        .into_iter()
+        .map(|(k, v)| (k, v.into_iter().collect()))
+        .collect();
+    seqs.iter()
+        .filter(|s| is_valid(&rulebook, s))
+        .map(|s| s[s.len() / 2])
+        .sum::<u32>()
+        .to_string()
 }
 
-static XMAS: &[char; 4] = &['X', 'M', 'A', 'S'];
-
-fn look_for_xmas(search: &Vec<Vec<char>>) -> usize {
-    let mut total = 0;
-    for y in 0..search.len() {
-        for x in 0..search[y].len() {
-            if search[y][x] == 'X' {
-                let xy = XY::new(x, y);
-                total += xmas_cnt(&search, &xy, D::Up, 0)
-                    + xmas_cnt(&search, &xy, D::Down, 0)
-                    + xmas_cnt(&search, &xy, D::Left, 0)
-                    + xmas_cnt(&search, &xy, D::Right, 0)
-                    + xmas_cnt(&search, &xy, D::UpLeft, 0)
-                    + xmas_cnt(&search, &xy, D::UpRight, 0)
-                    + xmas_cnt(&search, &xy, D::DownLeft, 0)
-                    + xmas_cnt(&search, &xy, D::DownRight, 0)
-            }
+fn is_valid(rulebook: &Rulebook, seq: &[u32]) -> bool {
+    let mut seen = HashSet::new();
+    for s in seq {
+        if let Some(before) = rulebook.get(s)
+            && seen.is_disjoint(before)
+        {
+            println!("{:?}: {s} is disjoint", seq);
+            return false;
         }
+        seen.insert(*s);
     }
-    total
-}
-
-fn xmas_cnt(search: &Vec<Vec<char>>, xy: &XY, dir: D, xmas_pos: usize) -> usize {
-    if xmas_pos == 4 {
-        1
-    } else if search[xy.y][xy.x] == XMAS[xmas_pos] {
-        xmas_cnt(search, &xy.dir(&dir), dir, xmas_pos + 1)
-    } else {
-        0
-    }
+    true
 }
 
 #[cfg(test)]
