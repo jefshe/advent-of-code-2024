@@ -1,4 +1,5 @@
 #![feature(let_chains)]
+#![feature(if_let_guard)]
 use color_eyre::Result;
 use ratatui::{
     buffer::Buffer,
