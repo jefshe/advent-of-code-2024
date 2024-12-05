@@ -4,19 +4,20 @@ mod part_a;
 mod part_b;
 
 #[derive(Debug)]
-pub struct Day4 {}
+pub struct Day5 {}
 
-impl Day4 {
+impl Day5 {
     pub fn new() -> Self {
         Self {}
     }
 }
 
-impl Day for Day4 {
+impl Day for Day5 {
     fn run(&self, _viz: Rect, _buf: &mut Buffer) -> Answer {
         Answer {
             parta: Some(part_a::run()),
-            partb: Some(part_b::run()),
+            // partb: Some(part_b::run()),
+            partb: None,
         }
     }
 }

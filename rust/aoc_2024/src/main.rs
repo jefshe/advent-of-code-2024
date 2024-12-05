@@ -4,25 +4,19 @@ use ratatui::{
     buffer::Buffer,
     crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     layout::{Constraint, Layout, Rect},
-    style::{
-        Color, Stylize,
-    },
+    style::{Color, Stylize},
     text::Line,
-    widgets::{
-        HighlightSpacing, List, ListItem, ListState, Paragraph,
-        StatefulWidget, Widget, Wrap,
-    },
+    widgets::{HighlightSpacing, List, ListItem, Paragraph, StatefulWidget, Widget, Wrap},
     DefaultTerminal,
 };
 
 pub mod days;
-pub mod util;
 pub mod gfx;
 pub mod list;
+pub mod util;
 
-use crate::days::*;
-use crate::list::*;
 use crate::gfx::*;
+use crate::list::*;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
@@ -115,8 +109,12 @@ impl Widget for &mut App {
         ])
         .areas(area);
 
-        let [list_area, item_area, viz_area] =
-            Layout::vertical([Constraint::Fill(TOP_RATIO), Constraint::Fill(1), Constraint::Fill(BOTTOM_RATIO)]).areas(main_area);
+        let [list_area, item_area, viz_area] = Layout::vertical([
+            Constraint::Fill(TOP_RATIO),
+            Constraint::Fill(1),
+            Constraint::Fill(BOTTOM_RATIO),
+        ])
+        .areas(main_area);
 
         App::render_header(header_area, buf);
         App::render_footer(footer_area, buf);

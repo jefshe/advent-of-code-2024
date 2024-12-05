@@ -1,7 +1,6 @@
 use ratatui::widgets::ListState;
 
-use crate::{Day, Day4};
-
+use crate::days::*;
 
 pub struct AOCList {
     pub items: Vec<AOCDay>,
@@ -10,10 +9,10 @@ pub struct AOCList {
 
 impl AOCList {
     pub fn default() -> Self {
-Self {
+        Self {
             items: vec![
+                AOCDay::new("Day 5", Box::new(Day5::new())),
                 AOCDay::new("Day 4", Box::new(Day4::new())),
-                AOCDay::todo("Day 5"),
                 AOCDay::todo("Day 6"),
                 AOCDay::todo("Day 7"),
                 AOCDay::todo("Day 8"),
