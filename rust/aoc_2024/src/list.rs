@@ -11,9 +11,9 @@ impl AOCList {
     pub fn default() -> Self {
         Self {
             items: vec![
+                AOCDay::new("Day 6", Box::new(Day6::new())),
                 AOCDay::new("Day 5", Box::new(Day5::new())),
                 AOCDay::new("Day 4", Box::new(Day4::new())),
-                AOCDay::todo("Day 6"),
                 AOCDay::todo("Day 7"),
                 AOCDay::todo("Day 8"),
                 AOCDay::todo("Day 9"),

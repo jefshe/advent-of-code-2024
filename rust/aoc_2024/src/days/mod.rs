@@ -11,5 +11,7 @@ pub trait Day {
 }
 pub mod day04;
 pub mod day05;
+pub mod day06;
 pub use day04::*;
 pub use day05::*;
+pub use day06::*;

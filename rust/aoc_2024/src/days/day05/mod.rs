@@ -8,7 +8,7 @@ use ratatui::prelude::*;
 mod part_a;
 mod part_b;
 
-pub type Rulebook = HashMap<u32, HashSet<u32>>;
+type Rulebook = HashMap<u32, HashSet<u32>>;
 
 #[derive(Debug)]
 pub struct Day5 {}
@@ -28,7 +28,7 @@ impl Day for Day5 {
     }
 }
 
-pub fn input() -> (Rulebook, Vec<Vec<u32>>) {
+fn input() -> (Rulebook, Vec<Vec<u32>>) {
     let (rules_part, seqs_part) = parse_2_parts("day05");
     let rulebook: Rulebook = rules_part
         .into_iter()

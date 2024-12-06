@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 use super::{input, Rulebook};
 
 pub fn run() -> String {

@@ -1,6 +1,14 @@
 use std::fs::File;
 use std::io::{self, BufRead};
+use std::ops::{Index, IndexMut};
 use std::path::Path;
+pub fn parse_lines(day: &str) -> Vec<String> {
+    read_lines(format!("./input/{}.txt", day))
+        .expect("Could not read file")
+        .map(|line| line.expect("Could not read line"))
+        .collect()
+}
+
 pub fn parse_chars(day: &str) -> Vec<Vec<char>> {
     read_lines(format!("./input/{}.txt", day))
         .expect("Could not read file")
@@ -52,6 +60,34 @@ pub enum D {
     UpRight,
     DownLeft,
     DownRight,
+}
+
+impl D {
+    pub fn cw(&self) -> D {
+        match self {
+            D::Up => D::Right,
+            D::Down => D::Left,
+            D::Left => D::Up,
+            D::Right => D::Down,
+            D::UpLeft => D::UpRight,
+            D::UpRight => D::DownRight,
+            D::DownLeft => D::UpLeft,
+            D::DownRight => D::DownLeft,
+        }
+    }
+
+    pub fn ccw(&self) -> D {
+        match self {
+            D::Up => D::Left,
+            D::Down => D::Right,
+            D::Left => D::Down,
+            D::Right => D::Up,
+            D::UpLeft => D::DownLeft,
+            D::UpRight => D::UpLeft,
+            D::DownLeft => D::DownRight,
+            D::DownRight => D::UpRight,
+        }
+    }
 }
 
 impl XY {
@@ -133,4 +169,27 @@ pub type Grid<T> = Vec<Vec<T>>;
 pub fn grid_get<'a, T>(grid: &'a Grid<T>, xy: &XY, dir: &D) -> &'a T {
     let pos = xy.dir(dir);
     &grid[pos.y][pos.x]
+}
+
+impl<T> Index<&XY> for Grid<T> {
+    type Output = T;
+    fn index(&self, xy: &XY) -> &Self::Output {
+        &self[xy.y][xy.x]
+    }
+}
+
+impl<T> IndexMut<&XY> for Grid<T> {
+    fn index_mut(&mut self, index: &XY) -> &mut Self::Output {
+        &mut self[index.y][index.x]
+    }
+}
+
+pub trait GridFn {
+    fn check(&self, xy: &XY) -> bool;
+}
+
+impl<T> GridFn for Grid<T> {
+    fn check(&self, xy: &XY) -> bool {
+        xy.x < self[0].len() && xy.y < self.len()
+    }
 }
