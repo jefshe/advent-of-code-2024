@@ -13,13 +13,11 @@ type Rulebook = HashMap<u32, HashSet<u32>>;
 
 async fn run(tx: TX) -> Result<()> {
     let (idx, s) = tx;
-    s.send(Done(
-        idx,
-        Answer {
-            parta: Some(part_a::run()),
-            partb: Some(part_b::run()),
-        },
-    ))?;
+    let ans = Answer {
+        parta: Some(part_a::run()),
+        partb: Some(part_b::run()),
+    };
+    s.send(Done(idx, ans))?;
     Ok(())
 }
 

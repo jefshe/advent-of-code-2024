@@ -14,6 +14,7 @@ pub type TX = (usize, UnboundedSender<AOCUpdate>);
 pub type RX = UnboundedReceiver<AOCUpdate>;
 
 pub enum AOCUpdate {
+    InProgress(usize),
     Render(usize, Vec<String>),
     Done(usize, Answer),
 }
@@ -53,6 +54,29 @@ impl AOCList {
             sender: tx,
         }
     }
+
+    pub fn run(&mut self, i: usize) {
+        self.items[i].run((i, self.sender.clone()));
+        self.sender.send(AOCUpdate::InProgress(i)).expect("gg");
+    }
+
+    pub fn update(&mut self) {
+        while let Some(event) = self.events.try_recv().ok() {
+            match event {
+                AOCUpdate::Render(i, txt) => {
+                    // println!("Received {:?}", txt);
+                    self.items[i].viz = Some(txt);
+                }
+                AOCUpdate::Done(i, ans) => {
+                    // println!("Received {:?}", ans);
+                    self.items[i].answer = Some(ans);
+                }
+                AOCUpdate::InProgress(i) => {
+                    self.items[i].viz = Some(vec!["In Progress...".to_string()]);
+                }
+            }
+        }
+    }
 }
 pub type BoxedAsync = Pin<Box<dyn Future<Output = Result<()>> + Send>>;
 pub type AsyncCall = fn(TX) -> BoxedAsync;
@@ -81,23 +105,38 @@ impl AOCDay {
         }
     }
 
+    pub fn run(&mut self, tx: TX) {
+        match self.runner {
+            Some(r) => {
+                let fut = r(tx);
+                tokio::spawn(async move {
+                    fut.await.unwrap();
+                });
+            }
+            None => {
+                self.answer = Some(Answer::default());
+            }
+        }
+    }
+
     pub fn render(&self, area: Rect, buf: &mut Buffer) {
-        let [answer, viz] =
-            Layout::horizontal([Constraint::Fill(ANSWER_RATIO), Constraint::Fill(VIZ_RATIO)])
-                .areas(area);
-        if let Some(ans) = &self.answer {
-            Paragraph::new(vec![
-                Line::styled(format!("Part A: {:?}", ans.partb), ANSWER_TEXT_COLOR),
-                Line::styled(format!("Part B: {:?}", ans.partb), ANSWER_TEXT_COLOR),
-            ])
+        if let Some(txt) = &self.viz {
+            let [answer, viz] =
+                Layout::horizontal([Constraint::Fill(ANSWER_RATIO), Constraint::Fill(VIZ_RATIO)])
+                    .areas(area);
+
+            Paragraph::new(match &self.answer {
+                Some(ans) => vec![
+                    Line::styled(format!("Part A: {:?}", ans.partb), ANSWER_TEXT_COLOR),
+                    Line::styled(format!("Part B: {:?}", ans.partb), ANSWER_TEXT_COLOR),
+                ],
+                None => vec![Line::raw("No Answer Yet")],
+            })
             .block(block("Answer"))
             .wrap(Wrap { trim: false })
             .render(answer, buf);
-        }
-
-        if let Some(txt) = &self.viz {
             Paragraph::new(txt.iter().map(|row| Line::raw(row)).collect::<Vec<Line>>())
-                .block(block("Progress"))
+                .block(block(""))
                 .render(viz, buf);
         }
     }

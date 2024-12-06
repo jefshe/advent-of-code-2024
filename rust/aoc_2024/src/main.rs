@@ -52,6 +52,7 @@ impl App {
             if let Event::Key(key) = event::read()? {
                 self.handle_key(key);
             };
+            self.aoc_list.update();
         }
         Ok(())
     }
@@ -75,7 +76,11 @@ impl App {
     }
 
     /// Changes the status of the selected list item
-    fn run_exercise(&mut self) {}
+    fn run_exercise(&mut self) {
+        if let Some(i) = self.aoc_list.state.selected() {
+            self.aoc_list.run(i);
+        }
+    }
 
     fn select_none(&mut self) {
         self.aoc_list.state.select(None);
