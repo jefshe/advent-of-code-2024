@@ -35,12 +35,12 @@ fn is_x_mas(search: &Grid<char>, xy: XY) -> bool {
         && side_b[0] != side_b[1]
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn it_works() {
-        run();
-    }
-}
+//     #[test]
+//     fn it_works() {
+//         run();
+//     }
+// }

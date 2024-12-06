@@ -14,6 +14,7 @@ use tokio::{self};
 
 pub mod days;
 pub mod gfx;
+pub mod griddy;
 pub mod list;
 pub mod util;
 
@@ -159,13 +160,10 @@ impl App {
             .highlight_symbol(">")
             .highlight_spacing(HighlightSpacing::Always);
 
-        // We need to disambiguate this trait method as both `Widget` and `StatefulWidget` share the
-        // same method name `render`.
         StatefulWidget::render(list, area, buf, &mut self.aoc_list.state);
     }
 
     fn render_selected_item(&self, area: Rect, buf: &mut Buffer) {
-        // We show the list item's info under the list in this paragraph
         if let Some(i) = self.aoc_list.state.selected() {
             self.aoc_list.items[i].render(area, buf);
         }

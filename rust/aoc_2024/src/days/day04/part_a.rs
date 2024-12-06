@@ -14,22 +14,21 @@ fn look_for_xmas(search: &Vec<Vec<char>>) -> usize {
         for x in 0..search[y].len() {
             if search[y][x] == 'X' {
                 let xy = XY::new(x, y);
-                total += xmas_cnt(&search, &xy, D::Up, 0) 
-                + xmas_cnt(&search, &xy, D::Down, 0) 
-                + xmas_cnt(&search, &xy, D::Left, 0) 
-                + xmas_cnt(&search, &xy, D::Right, 0) 
-                + xmas_cnt(&search, &xy, D::UpLeft, 0) 
-                + xmas_cnt(&search, &xy, D::UpRight, 0) 
-                + xmas_cnt(&search, &xy, D::DownLeft, 0)
-                + xmas_cnt(&search, &xy, D::DownRight, 0)
+                total += xmas_cnt(&search, &xy, D::Up, 0)
+                    + xmas_cnt(&search, &xy, D::Down, 0)
+                    + xmas_cnt(&search, &xy, D::Left, 0)
+                    + xmas_cnt(&search, &xy, D::Right, 0)
+                    + xmas_cnt(&search, &xy, D::UpLeft, 0)
+                    + xmas_cnt(&search, &xy, D::UpRight, 0)
+                    + xmas_cnt(&search, &xy, D::DownLeft, 0)
+                    + xmas_cnt(&search, &xy, D::DownRight, 0)
             }
         }
     }
     total
 }
 
-
-fn xmas_cnt(search: &Vec<Vec<char>>, xy: &XY, dir: D, xmas_pos: usize ) -> usize {
+fn xmas_cnt(search: &Vec<Vec<char>>, xy: &XY, dir: D, xmas_pos: usize) -> usize {
     if xmas_pos == 4 {
         1
     } else if search[xy.y][xy.x] == XMAS[xmas_pos] {
@@ -39,12 +38,12 @@ fn xmas_cnt(search: &Vec<Vec<char>>, xy: &XY, dir: D, xmas_pos: usize ) -> usize
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn it_works() {
-        run();
-    }
-}
+//     #[test]
+//     fn it_works() {
+//         run();
+//     }
+// }

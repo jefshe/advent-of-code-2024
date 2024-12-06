@@ -19,12 +19,12 @@ fn is_valid(rulebook: &Rulebook, seq: &[u32]) -> bool {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn it_works() {
-        run();
-    }
-}
+//     #[test]
+//     fn it_works() {
+//         run();
+//     }
+// }

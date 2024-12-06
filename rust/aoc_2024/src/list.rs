@@ -76,6 +76,7 @@ impl AOCList {
                 }
             }
         }
+        self.state.select(self.state.selected());
     }
 }
 pub type BoxedAsync = Pin<Box<dyn Future<Output = Result<()>> + Send>>;

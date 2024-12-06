@@ -44,13 +44,13 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub struct XY {
     pub x: usize,
     pub y: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub enum D {
     Up,
     Down,

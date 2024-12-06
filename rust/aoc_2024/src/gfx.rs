@@ -25,6 +25,7 @@ pub const VIZ_RATIO: u16 = 2;
 
 pub fn block(title: &str) -> Block {
     Block::new()
+        .title(title)
         .borders(Borders::TOP)
         .border_set(symbols::border::EMPTY)
         .border_style(TODO_HEADER_STYLE)
