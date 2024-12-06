@@ -1,7 +1,7 @@
 use crate::util::{bigga, parse_chars, D, XY};
 pub fn run() -> String {
     let chars = parse_chars("day04");
-    let search = bigga(&chars, 1, '.');
+    let search = bigga(chars, 1, '.');
     let count = look_for_xmas(&search);
     count.to_string()
 }
@@ -14,14 +14,14 @@ fn look_for_xmas(search: &Vec<Vec<char>>) -> usize {
         for x in 0..search[y].len() {
             if search[y][x] == 'X' {
                 let xy = XY::new(x, y);
-                total += xmas_cnt(&search, &xy, D::Up, 0)
-                    + xmas_cnt(&search, &xy, D::Down, 0)
-                    + xmas_cnt(&search, &xy, D::Left, 0)
-                    + xmas_cnt(&search, &xy, D::Right, 0)
-                    + xmas_cnt(&search, &xy, D::UpLeft, 0)
-                    + xmas_cnt(&search, &xy, D::UpRight, 0)
-                    + xmas_cnt(&search, &xy, D::DownLeft, 0)
-                    + xmas_cnt(&search, &xy, D::DownRight, 0)
+                total += xmas_cnt(search, &xy, D::Up, 0)
+                    + xmas_cnt(search, &xy, D::Down, 0)
+                    + xmas_cnt(search, &xy, D::Left, 0)
+                    + xmas_cnt(search, &xy, D::Right, 0)
+                    + xmas_cnt(search, &xy, D::UpLeft, 0)
+                    + xmas_cnt(search, &xy, D::UpRight, 0)
+                    + xmas_cnt(search, &xy, D::DownLeft, 0)
+                    + xmas_cnt(search, &xy, D::DownRight, 0)
             }
         }
     }

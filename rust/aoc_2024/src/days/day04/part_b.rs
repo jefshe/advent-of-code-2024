@@ -2,7 +2,7 @@ use crate::util::{bigga, grid_get, parse_chars, Grid, D::*, XY};
 
 pub fn run() -> String {
     let chars = parse_chars("day04");
-    let search = bigga(&chars, 1, '.');
+    let search = bigga(chars, 1, '.');
     let count = look_for_mas(&search);
     count.to_string()
 }

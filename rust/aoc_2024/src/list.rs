@@ -3,12 +3,12 @@ use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
     text::Line,
-    widgets::{ListState, Paragraph, Widget, Wrap},
+    widgets::{ListItem, ListState, Paragraph, Widget, Wrap},
 };
 use std::{future::Future, pin::Pin};
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
-use crate::{block, days::*, ANSWER_RATIO, ANSWER_TEXT_COLOR, VIZ_RATIO};
+use crate::{block, days::*, gfx::*};
 
 pub type TX = (usize, UnboundedSender<AOCUpdate>);
 pub type RX = UnboundedReceiver<AOCUpdate>;
@@ -25,16 +25,15 @@ pub struct AOCList {
     pub events: UnboundedReceiver<AOCUpdate>,
     pub sender: UnboundedSender<AOCUpdate>,
 }
-
-impl AOCList {
-    pub fn default() -> Self {
+impl Default for AOCList {
+    fn default() -> Self {
         let (tx, rx) = mpsc::unbounded_channel::<AOCUpdate>();
         Self {
             items: vec![
+                AOCDay::new("Day 7", day07::wrapped_run),
                 AOCDay::new("Day 6", day06::wrapped_run),
                 AOCDay::new("Day 5", day05::wrapped_run),
                 AOCDay::new("Day 4", day04::wrapped_run),
-                AOCDay::todo("Day 7"),
                 AOCDay::todo("Day 8"),
                 AOCDay::todo("Day 9"),
                 AOCDay::todo("Day 10"),
@@ -54,14 +53,15 @@ impl AOCList {
             sender: tx,
         }
     }
-
+}
+impl AOCList {
     pub fn run(&mut self, i: usize) {
-        self.items[i].run((i, self.sender.clone()));
         self.sender.send(AOCUpdate::InProgress(i)).expect("gg");
+        self.items[i].run((i, self.sender.clone()));
     }
 
     pub fn update(&mut self) {
-        while let Some(event) = self.events.try_recv().ok() {
+        while let Ok(event) = self.events.try_recv() {
             match event {
                 AOCUpdate::Render(i, txt) => {
                     // println!("Received {:?}", txt);
@@ -131,14 +131,29 @@ impl AOCDay {
                     Line::styled(format!("Part A: {:?}", ans.partb), ANSWER_TEXT_COLOR),
                     Line::styled(format!("Part B: {:?}", ans.partb), ANSWER_TEXT_COLOR),
                 ],
-                None => vec![Line::raw("No Answer Yet")],
+                None => vec![Line::styled("In Progress...", INPROGRESS_TEXT_COLOR)],
             })
             .block(block("Answer"))
             .wrap(Wrap { trim: false })
             .render(answer, buf);
-            Paragraph::new(txt.iter().map(|row| Line::raw(row)).collect::<Vec<Line>>())
+            Paragraph::new(txt.iter().map(Line::raw).collect::<Vec<Line>>())
                 .block(block(""))
                 .render(viz, buf);
+        }
+    }
+}
+
+impl From<&AOCDay> for ListItem<'_> {
+    fn from(value: &AOCDay) -> Self {
+        match value.runner {
+            Some(_) => Self::new(Line::styled(
+                format!(" ✓ {}", value.title),
+                COMPLETED_TEXT_FG_COLOR,
+            )),
+            None => Self::new(Line::styled(
+                format!(" x {}", value.title),
+                INCOMPLETE_TEXT_FG_COLOR,
+            )),
         }
     }
 }

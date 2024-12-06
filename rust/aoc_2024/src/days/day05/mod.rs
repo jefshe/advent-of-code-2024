@@ -40,9 +40,14 @@ fn input() -> (Rulebook, Vec<Vec<u32>>) {
         .into_iter()
         .map(|(k, v)| (k, v.into_iter().collect()))
         .collect();
+
     let seqs: Vec<Vec<u32>> = seqs_part
         .into_iter()
-        .map(|l| l.split(",").map(|n| n.parse().unwrap()).collect())
+        .map(|l| {
+            l.split(",")
+                .map(|n| n.parse().expect(&format!("cannot parse {n}")))
+                .collect()
+        })
         .collect();
     (rulebook, seqs)
 }

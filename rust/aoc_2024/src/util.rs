@@ -21,12 +21,12 @@ pub fn parse_2_parts(day: &str) -> (Vec<String>, Vec<String>) {
         .expect("Could not read file")
         .map(|line| line.expect("Could not read line"));
     (
-        buf.by_ref().take_while(|line| line != "").collect(),
+        buf.by_ref().take_while(|line| !line.is_empty()).collect(),
         buf.collect(),
     )
 }
 
-pub fn bigga<T: Clone>(vec: &Vec<Vec<T>>, by: usize, default: T) -> Vec<Vec<T>> {
+pub fn bigga<T: Clone>(vec: Vec<Vec<T>>, by: usize, default: T) -> Vec<Vec<T>> {
     let mut new_vec = vec![vec![default; vec.len() + 2 * by]; vec.len() + 2 * by];
     for i in 0..vec.len() {
         for j in 0..vec[i].len() {

@@ -5,8 +5,7 @@ use ratatui::{
     buffer::Buffer,
     crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     layout::{Constraint, Layout, Rect},
-    style::{Color, Stylize},
-    text::Line,
+    style::Stylize,
     widgets::{HighlightSpacing, List, ListItem, Paragraph, StatefulWidget, Widget},
     DefaultTerminal,
 };
@@ -166,29 +165,6 @@ impl App {
     fn render_selected_item(&self, area: Rect, buf: &mut Buffer) {
         if let Some(i) = self.aoc_list.state.selected() {
             self.aoc_list.items[i].render(area, buf);
-        }
-    }
-}
-
-const fn alternate_colors(i: usize) -> Color {
-    if i % 2 == 0 {
-        NORMAL_ROW_BG
-    } else {
-        ALT_ROW_BG_COLOR
-    }
-}
-
-impl From<&AOCDay> for ListItem<'_> {
-    fn from(value: &AOCDay) -> Self {
-        match value.runner {
-            Some(_) => Self::new(Line::styled(
-                format!(" ✓ {}", value.title),
-                COMPLETED_TEXT_FG_COLOR,
-            )),
-            None => Self::new(Line::styled(
-                format!(" x {}", value.title),
-                INCOMPLETE_TEXT_FG_COLOR,
-            )),
         }
     }
 }
