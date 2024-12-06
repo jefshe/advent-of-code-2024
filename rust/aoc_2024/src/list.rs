@@ -1,19 +1,38 @@
-use ratatui::widgets::ListState;
+use color_eyre::Result;
+use ratatui::{
+    buffer::Buffer,
+    layout::{Constraint, Layout, Rect},
+    text::Line,
+    widgets::{ListState, Paragraph, Widget, Wrap},
+};
+use std::{future::Future, pin::Pin};
+use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
-use crate::days::*;
+use crate::{block, days::*, ANSWER_RATIO, ANSWER_TEXT_COLOR, VIZ_RATIO};
+
+pub type TX = (usize, UnboundedSender<AOCUpdate>);
+pub type RX = UnboundedReceiver<AOCUpdate>;
+
+pub enum AOCUpdate {
+    Render(usize, Vec<String>),
+    Done(usize, Answer),
+}
 
 pub struct AOCList {
     pub items: Vec<AOCDay>,
     pub state: ListState,
+    pub events: UnboundedReceiver<AOCUpdate>,
+    pub sender: UnboundedSender<AOCUpdate>,
 }
 
 impl AOCList {
     pub fn default() -> Self {
+        let (tx, rx) = mpsc::unbounded_channel::<AOCUpdate>();
         Self {
             items: vec![
-                AOCDay::new("Day 6", Box::new(Day6::new())),
-                AOCDay::new("Day 5", Box::new(Day5::new())),
-                AOCDay::new("Day 4", Box::new(Day4::new())),
+                AOCDay::new("Day 6", day06::wrapped_run),
+                AOCDay::new("Day 5", day05::wrapped_run),
+                AOCDay::new("Day 4", day04::wrapped_run),
                 AOCDay::todo("Day 7"),
                 AOCDay::todo("Day 8"),
                 AOCDay::todo("Day 9"),
@@ -30,26 +49,56 @@ impl AOCList {
                 AOCDay::todo("Day 20"),
             ],
             state: ListState::default(),
+            events: rx,
+            sender: tx,
         }
     }
 }
-
+pub type BoxedAsync = Pin<Box<dyn Future<Output = Result<()>> + Send>>;
+pub type AsyncCall = fn(TX) -> BoxedAsync;
 pub struct AOCDay {
     pub title: String,
-    pub day: Option<Box<dyn Day>>,
+    pub runner: Option<AsyncCall>,
+    pub viz: Option<Vec<String>>,
+    pub answer: Option<Answer>,
 }
 
 impl AOCDay {
-    fn new(title: &str, day: Box<dyn Day>) -> Self {
+    fn new(title: &str, runner: AsyncCall) -> Self {
         Self {
             title: title.to_string(),
-            day: Some(day),
+            viz: None,
+            answer: None,
+            runner: Some(runner),
         }
     }
     fn todo(title: &str) -> Self {
         Self {
             title: title.to_string(),
-            day: None,
+            viz: None,
+            answer: None,
+            runner: None,
+        }
+    }
+
+    pub fn render(&self, area: Rect, buf: &mut Buffer) {
+        let [answer, viz] =
+            Layout::horizontal([Constraint::Fill(ANSWER_RATIO), Constraint::Fill(VIZ_RATIO)])
+                .areas(area);
+        if let Some(ans) = &self.answer {
+            Paragraph::new(vec![
+                Line::styled(format!("Part A: {:?}", ans.partb), ANSWER_TEXT_COLOR),
+                Line::styled(format!("Part B: {:?}", ans.partb), ANSWER_TEXT_COLOR),
+            ])
+            .block(block("Answer"))
+            .wrap(Wrap { trim: false })
+            .render(answer, buf);
+        }
+
+        if let Some(txt) = &self.viz {
+            Paragraph::new(txt.iter().map(|row| Line::raw(row)).collect::<Vec<Line>>())
+                .block(block("Progress"))
+                .render(viz, buf);
         }
     }
 }

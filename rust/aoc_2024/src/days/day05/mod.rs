@@ -1,31 +1,30 @@
-use std::collections::{HashMap, HashSet};
-
+use super::Answer;
 use crate::util::parse_2_parts;
-
-use super::{Answer, Day};
+use crate::AOCUpdate::*;
+use crate::BoxedAsync;
+use crate::TX;
 use itertools::Itertools;
-use ratatui::prelude::*;
+use std::collections::{HashMap, HashSet};
 mod part_a;
 mod part_b;
+use color_eyre::Result;
 
 type Rulebook = HashMap<u32, HashSet<u32>>;
 
-#[derive(Debug)]
-pub struct Day5 {}
-
-impl Day5 {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
-impl Day for Day5 {
-    fn run(&self, _viz: Rect, _buf: &mut Buffer) -> Answer {
+async fn run(tx: TX) -> Result<()> {
+    let (idx, s) = tx;
+    s.send(Done(
+        idx,
         Answer {
             parta: Some(part_a::run()),
             partb: Some(part_b::run()),
-        }
-    }
+        },
+    ))?;
+    Ok(())
+}
+
+pub fn wrapped_run(tx: TX) -> BoxedAsync {
+    Box::pin(run(tx))
 }
 
 fn input() -> (Rulebook, Vec<Vec<u32>>) {

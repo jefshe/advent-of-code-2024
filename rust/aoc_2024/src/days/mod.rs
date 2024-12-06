@@ -1,4 +1,6 @@
-use ratatui::prelude::*;
+use crate::TX;
+use async_trait::async_trait;
+use color_eyre::Result;
 
 #[derive(Debug, Default, Clone)]
 pub struct Answer {
@@ -6,12 +8,10 @@ pub struct Answer {
     pub partb: Option<String>,
 }
 
-pub trait Day {
-    fn run(&self, viz_area: Rect, buf: &mut Buffer) -> Answer;
+#[async_trait]
+pub trait Day: Send + Sync {
+    async fn run(tx: TX) -> Result<()>;
 }
 pub mod day04;
 pub mod day05;
 pub mod day06;
-pub use day04::*;
-pub use day05::*;
-pub use day06::*;

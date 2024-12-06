@@ -7,9 +7,10 @@ use ratatui::{
     layout::{Constraint, Layout, Rect},
     style::{Color, Stylize},
     text::Line,
-    widgets::{HighlightSpacing, List, ListItem, Paragraph, StatefulWidget, Widget, Wrap},
+    widgets::{HighlightSpacing, List, ListItem, Paragraph, StatefulWidget, Widget},
     DefaultTerminal,
 };
+use tokio::{self};
 
 pub mod days;
 pub mod gfx;
@@ -19,20 +20,15 @@ pub mod util;
 use crate::gfx::*;
 use crate::list::*;
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     color_eyre::install()?;
     let terminal = ratatui::init();
-    let app_result = App::default().run(terminal);
+    let app_result = App::default().run(terminal).await;
     ratatui::restore();
     app_result
 }
 
-/// This struct holds the current state of the app. In particular, it has the `aoc_list` field
-/// which is a wrapper around `ListState`. Keeping track of the state lets us render the
-/// associated widget with its state and have access to features such as natural scrolling.
-///
-/// Check the event handling at the bottom to see how to change the state on incoming events. Check
-/// the drawing logic for items on how to specify the highlighting style for selected items.
 struct App {
     should_exit: bool,
     aoc_list: AOCList,
@@ -50,7 +46,7 @@ impl Default for App {
 }
 
 impl App {
-    fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
+    async fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         while !self.should_exit {
             terminal.draw(|frame| frame.render_widget(&mut self, frame.area()))?;
             if let Event::Key(key) = event::read()? {
@@ -110,17 +106,14 @@ impl Widget for &mut App {
         ])
         .areas(area);
 
-        let [list_area, item_area, viz_area] = Layout::vertical([
-            Constraint::Fill(TOP_RATIO),
-            Constraint::Fill(1),
-            Constraint::Fill(BOTTOM_RATIO),
-        ])
-        .areas(main_area);
+        let [list_area, selected_area] =
+            Layout::vertical([Constraint::Fill(TOP_RATIO), Constraint::Fill(BOTTOM_RATIO)])
+                .areas(main_area);
 
         App::render_header(header_area, buf);
         App::render_footer(footer_area, buf);
         self.render_list(list_area, buf);
-        self.render_selected_item(item_area, viz_area, buf);
+        self.render_selected_item(selected_area, buf);
     }
 }
 
@@ -166,30 +159,11 @@ impl App {
         StatefulWidget::render(list, area, buf, &mut self.aoc_list.state);
     }
 
-    fn render_selected_item(&self, area: Rect, viz_area: Rect, buf: &mut Buffer) {
+    fn render_selected_item(&self, area: Rect, buf: &mut Buffer) {
         // We show the list item's info under the list in this paragraph
-        let block = block("Answer");
-
-        if let Some(i) = self.aoc_list.state.selected()
-            && let Some(day) = &self.aoc_list.items[i].day
-        {
-            let answer = day.run(viz_area, buf);
-            Paragraph::new(vec![
-                Line::styled(
-                    format!("Part A: {}", &answer.parta.unwrap_or("NA".into())),
-                    TEXT_FG_COLOR,
-                ),
-                Line::styled(
-                    format!("Part B: {}", &answer.partb.unwrap_or("NA".into())),
-                    TEXT_FG_COLOR,
-                ),
-            ])
-            .block(block)
-            .fg(TEXT_FG_COLOR)
-            .wrap(Wrap { trim: false })
-            .render(area, buf);
+        if let Some(i) = self.aoc_list.state.selected() {
+            self.aoc_list.items[i].render(area, buf);
         }
-        // We can now render the item info
     }
 }
 
@@ -203,7 +177,7 @@ const fn alternate_colors(i: usize) -> Color {
 
 impl From<&AOCDay> for ListItem<'_> {
     fn from(value: &AOCDay) -> Self {
-        match value.day {
+        match value.runner {
             Some(_) => Self::new(Line::styled(
                 format!(" ✓ {}", value.title),
                 COMPLETED_TEXT_FG_COLOR,

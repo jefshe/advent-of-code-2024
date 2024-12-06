@@ -1,27 +1,27 @@
-use std::collections::{HashMap, HashSet};
-
-use crate::util::{parse_2_parts, parse_chars, parse_lines};
-
-use super::{Answer, Day};
-use itertools::Itertools;
-use ratatui::prelude::*;
+use super::Answer;
+use crate::AOCUpdate::*;
+use crate::BoxedAsync;
+use crate::TX;
 mod part_a;
+// mod part_b;
+use color_eyre::Result;
 
-pub type Rulebook = HashMap<u32, HashSet<u32>>;
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Day6 {}
 
-impl Day6 {
-    pub fn new() -> Self {
-        Self {}
-    }
+pub async fn run(tx: TX) -> Result<()> {
+    let parta = part_a::run(&tx);
+    let (idx, s) = tx;
+    s.send(Done(
+        idx,
+        Answer {
+            parta: Some(parta),
+            partb: None,
+        },
+    ))?;
+    Ok(())
 }
 
-impl Day for Day6 {
-    fn run(&self, viz: Rect, buf: &mut Buffer) -> Answer {
-        Answer {
-            parta: Some(part_a::run(viz, buf)),
-            partb: None,
-        }
-    }
+pub fn wrapped_run(tx: TX) -> BoxedAsync {
+    Box::pin(run(tx))
 }
