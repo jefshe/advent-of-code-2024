@@ -1,12 +1,8 @@
+use regex::Regex;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::ops::{Index, IndexMut};
 use std::path::Path;
-
-use regex::Regex;
-
-use crate::days::Answer;
-use crate::{Ev, ItemTX};
 
 pub fn parse_lines_iter(day: &str) -> impl Iterator<Item = String> {
     read_lines(format!("./input/{day}"))

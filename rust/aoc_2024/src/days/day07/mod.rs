@@ -1,24 +1,22 @@
-use super::{Answer, TX};
+use super::{time_run, Answer, TX};
 use crate::BoxedAsync;
 use crate::{util::*, ItemTX};
 use color_eyre::Result;
+use rayon::prelude::*;
 use regex::Regex;
 use std::cmp;
 
 async fn run(mut tx: ItemTX) -> Result<()> {
-    let parta = parta(&mut tx);
-    let partb = partb(&mut tx);
-    tx.done(Answer {
-        parta: Some(parta),
-        partb: Some(partb),
-    })?;
+    let parta = time_run(|| parta(&mut tx));
+    let partb = time_run(|| partb(&mut tx));
+    tx.done(Answer { parta, partb })?;
     Ok(())
 }
 
 pub fn parta(_tx: &mut ItemTX) -> String {
     let maths = input();
     maths
-        .iter()
+        .par_iter()
         .filter(|(target, rest)| can_math_a(*target, 0, rest))
         .map(|(t, _)| t)
         .sum::<usize>()
@@ -28,7 +26,7 @@ pub fn parta(_tx: &mut ItemTX) -> String {
 pub fn partb(_tx: &mut ItemTX) -> String {
     let maths = input();
     maths
-        .iter()
+        .par_iter()
         .filter(|(target, rest)| can_math_b(*target, 0, rest))
         .map(|(t, _)| t)
         .sum::<usize>()

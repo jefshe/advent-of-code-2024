@@ -1,7 +1,8 @@
+use super::time_run;
 use super::Answer;
+use super::TX;
 use crate::util::parse_2_parts;
 use crate::BoxedAsync;
-use crate::Ev;
 use crate::ItemTX;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
@@ -11,13 +12,12 @@ use color_eyre::Result;
 
 type Rulebook = HashMap<u32, HashSet<u32>>;
 
-async fn run(tx: ItemTX) -> Result<()> {
-    let (idx, s) = tx;
+async fn run(mut tx: ItemTX) -> Result<()> {
     let ans = Answer {
-        parta: Some(part_a::run()),
-        partb: Some(part_b::run()),
+        parta: time_run(part_a::run),
+        partb: time_run(part_b::run),
     };
-    s.send(Ev::Done(idx, ans))?;
+    tx.done(ans)?;
     Ok(())
 }
 

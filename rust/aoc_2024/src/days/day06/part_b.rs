@@ -1,18 +1,20 @@
-use std::collections::HashSet;
-
 use crate::{
+    days::TX,
     griddy::Griddy,
     util::{bigga, parse_chars, D, XY},
+    ItemTX,
 };
+use rayon::prelude::*;
+use std::{collections::HashSet, time::Instant};
 
 const INPUT_DAY: &str = "day06";
 
-pub fn run() -> String {
+pub fn run(tx: &mut ItemTX) -> String {
+    let mut now = Instant::now();
     let mut grid = parse_chars(INPUT_DAY);
     grid = bigga(grid, 1, 'Z');
     let griddy = Griddy::new(grid);
     let pos = griddy.find(&'^').unwrap();
-
     let ans = griddy
         .data
         .iter()
@@ -24,9 +26,16 @@ pub fn run() -> String {
             check[xy] = 'O';
             check
         })
+        .collect::<Vec<_>>();
+    tx.append(format!("chunking {:?}", now.elapsed())).unwrap();
+    now = Instant::now();
+    let ret = ans
+        .iter()
         .filter(|g| is_loop(g, HashSet::new(), &pos, &D::Up))
-        .count();
-    ans.to_string()
+        .count()
+        .to_string();
+    tx.append(format!("filtering {:?}", now.elapsed())).unwrap();
+    ret
 }
 
 pub fn is_loop(grid: &Griddy<char>, mut visited: HashSet<(XY, D)>, pos: &XY, facing: &D) -> bool {

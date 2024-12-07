@@ -105,14 +105,11 @@ impl AOCDay {
                 .alignment(Alignment::Center)
                 .render(area, buf);
         }
-        Paragraph::new(match &self.answer {
-            RunState::Done(ans) => vec![
-                Line::styled(format!("Part A: {:?}", ans.parta), ANSWER_TEXT_COLOR),
-                Line::styled(format!("Part B: {:?}", ans.partb), ANSWER_TEXT_COLOR),
-            ],
-            RunState::InProgress => vec![Line::styled("In Progress...", INPROGRESS_TEXT_COLOR)],
-            RunState::NotRun => vec![],
-        })
+        match &self.answer {
+            RunState::Done(ans) => ans.into_paragraph(),
+            RunState::InProgress => Paragraph::new("In Progress...").style(INPROGRESS_TEXT_COLOR),
+            RunState::NotRun => Paragraph::new(""),
+        }
         .block(block("Answer"))
         .wrap(Wrap { trim: false })
         .render(area, buf);

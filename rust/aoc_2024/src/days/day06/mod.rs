@@ -1,6 +1,7 @@
+use super::time_run;
 use super::Answer;
+use super::TX;
 use crate::BoxedAsync;
-use crate::Ev;
 use crate::ItemTX;
 mod part_a;
 mod part_b;
@@ -9,15 +10,10 @@ use color_eyre::Result;
 #[derive(Debug, Default)]
 pub struct Day6 {}
 
-pub async fn run(tx: ItemTX) -> Result<()> {
-    let (idx, s) = tx;
-    s.send(Ev::Done(
-        idx,
-        Answer {
-            parta: Some(part_a::run()),
-            partb: Some(part_b::run()),
-        },
-    ))?;
+pub async fn run(mut tx: ItemTX) -> Result<()> {
+    let parta = time_run(part_a::run);
+    let partb = time_run(|| part_b::run(&mut tx));
+    tx.done(Answer { parta, partb })?;
     Ok(())
 }
 

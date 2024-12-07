@@ -1,5 +1,6 @@
 #![feature(let_chains)]
 #![feature(if_let_guard)]
+#![feature(duration_millis_float)]
 use color_eyre::Result;
 use ratatui::{
     buffer::Buffer,
@@ -78,10 +79,10 @@ impl App {
             Ev::Render(i, txt) => self.aoc_list.items[i].viz = Some(txt),
             Ev::RenderAppend(i, txt) => match self.aoc_list.items[i].viz {
                 Some(ref mut v) => {
-                    v.extend(txt);
+                    v.push(txt);
                 }
                 None => {
-                    self.aoc_list.items[i].viz = Some(txt);
+                    self.aoc_list.items[i].viz = Some(vec![txt]);
                 }
             },
             Ev::Done(i, ans) => self.aoc_list.items[i].answer = RunState::Done(ans),

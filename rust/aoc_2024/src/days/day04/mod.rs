@@ -1,18 +1,14 @@
-use super::Answer;
-use crate::{BoxedAsync, Ev, ItemTX};
+use super::{time_run, Answer, TX};
+use crate::{BoxedAsync, ItemTX};
 mod part_a;
 mod part_b;
 use color_eyre::Result;
 
-async fn run(tx: ItemTX) -> Result<()> {
-    let (idx, s) = tx;
-    s.send(Ev::Done(
-        idx,
-        Answer {
-            parta: Some(part_a::run()),
-            partb: Some(part_b::run()),
-        },
-    ))?;
+async fn run(mut tx: ItemTX) -> Result<()> {
+    tx.done(Answer {
+        parta: time_run(part_a::run),
+        partb: time_run(part_b::run),
+    })?;
     Ok(())
 }
 
