@@ -3,28 +3,38 @@
 use color_eyre::Result;
 use ratatui::{
     buffer::Buffer,
-    crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind},
     layout::{Constraint, Layout, Rect},
     style::Stylize,
     widgets::{HighlightSpacing, List, ListItem, Paragraph, StatefulWidget, Widget},
     DefaultTerminal,
 };
-use tokio::{self};
+use tokio::{self, runtime::Builder};
 
 pub mod days;
+pub mod event_handler;
 pub mod gfx;
 pub mod griddy;
 pub mod list;
 pub mod util;
 
+use crate::event_handler::*;
 use crate::gfx::*;
 use crate::list::*;
 
-#[tokio::main]
-async fn main() -> Result<()> {
+fn main() {
+    Builder::new_multi_thread()
+        .thread_stack_size(5 * 1024 * 1024)
+        .build()
+        .expect("Unable to create runtime")
+        .block_on(start_app())
+        .expect("Unable to start app");
+}
+
+async fn start_app() -> Result<()> {
     color_eyre::install()?;
+    let events = EventHandler::new();
     let terminal = ratatui::init();
-    let app_result = App::default().run(terminal).await;
+    let app_result = App::new(events.tx().await).run(events, terminal).await;
     ratatui::restore();
     app_result
 }
@@ -32,73 +42,42 @@ async fn main() -> Result<()> {
 struct App {
     should_exit: bool,
     aoc_list: AOCList,
+    tx: TX,
 }
 
-impl Default for App {
-    fn default() -> Self {
+impl App {
+    fn new(tx: TX) -> Self {
         let mut aoc_list = AOCList::default();
         aoc_list.state.select(Some(0));
         Self {
             should_exit: false,
             aoc_list,
+            tx,
         }
     }
-}
 
-impl App {
-    async fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
+    async fn run(mut self, mut events: EventHandler, mut terminal: DefaultTerminal) -> Result<()> {
         while !self.should_exit {
             terminal.draw(|frame| frame.render_widget(&mut self, frame.area()))?;
-            if let Event::Key(key) = event::read()? {
-                self.handle_key(key);
-            };
-            self.aoc_list.update();
+            let ev = events.next().await?;
+            self.update_state(ev);
         }
         Ok(())
     }
 
-    fn handle_key(&mut self, key: KeyEvent) {
-        if key.kind != KeyEventKind::Press {
-            return;
-        }
-        match key.code {
-            KeyCode::Char('q') | KeyCode::Esc => self.should_exit = true,
-            KeyCode::Char('h') | KeyCode::Left => self.select_none(),
-            KeyCode::Char('j') | KeyCode::Down => self.select_next(),
-            KeyCode::Char('k') | KeyCode::Up => self.select_previous(),
-            KeyCode::Char('g') | KeyCode::Home => self.select_first(),
-            KeyCode::Char('G') | KeyCode::End => self.select_last(),
-            KeyCode::Char('l') | KeyCode::Right | KeyCode::Enter => {
-                self.run_exercise();
+    fn update_state(&mut self, event: Ev) {
+        match event {
+            Ev::Quit => self.should_exit = true,
+            Ev::Up => self.aoc_list.state.select_previous(),
+            Ev::Down => self.aoc_list.state.select_next(),
+            Ev::Run if let Some(i) = self.aoc_list.state.selected() => {
+                self.aoc_list.run(i, self.tx.clone())
             }
+            Ev::InProgress(i) => self.aoc_list.items[i].viz = Some(vec!["In Progress".to_string()]),
+            Ev::Render(i, txt) => self.aoc_list.items[i].viz = Some(txt),
+            Ev::Done(i, ans) => self.aoc_list.items[i].answer = Some(ans),
             _ => {}
         }
-    }
-
-    /// Changes the status of the selected list item
-    fn run_exercise(&mut self) {
-        if let Some(i) = self.aoc_list.state.selected() {
-            self.aoc_list.run(i);
-        }
-    }
-
-    fn select_none(&mut self) {
-        self.aoc_list.state.select(None);
-    }
-
-    fn select_next(&mut self) {
-        self.aoc_list.state.select_next();
-    }
-    fn select_previous(&mut self) {
-        self.aoc_list.state.select_previous();
-    }
-
-    fn select_first(&mut self) {
-        self.aoc_list.state.select_first();
-    }
-
-    fn select_last(&mut self) {
-        self.aoc_list.state.select_last();
     }
 }
 

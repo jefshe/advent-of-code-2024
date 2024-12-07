@@ -1,8 +1,8 @@
 use super::Answer;
 use crate::util::parse_2_parts;
-use crate::AOCUpdate::*;
 use crate::BoxedAsync;
-use crate::TX;
+use crate::Ev;
+use crate::ItemTX;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 mod part_a;
@@ -11,17 +11,17 @@ use color_eyre::Result;
 
 type Rulebook = HashMap<u32, HashSet<u32>>;
 
-async fn run(tx: TX) -> Result<()> {
+async fn run(tx: ItemTX) -> Result<()> {
     let (idx, s) = tx;
     let ans = Answer {
         parta: Some(part_a::run()),
         partb: Some(part_b::run()),
     };
-    s.send(Done(idx, ans))?;
+    s.send(Ev::Done(idx, ans))?;
     Ok(())
 }
 
-pub fn wrapped_run(tx: TX) -> BoxedAsync {
+pub fn wrapped_run(tx: ItemTX) -> BoxedAsync {
     Box::pin(run(tx))
 }
 

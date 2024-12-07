@@ -1,10 +1,7 @@
-use crate::{
-    util::{bigga, parse_chars, Grid, D, XY},
-    TX,
-};
+use crate::util::{bigga, parse_chars, Grid, D, XY};
 
 const INPUT_DAY: &str = "day06";
-pub fn run(_tx: &TX) -> String {
+pub fn run() -> String {
     let mut grid = parse_chars(INPUT_DAY);
     grid = bigga(grid, 1, 'Z');
     let y = grid.iter().position(|r| r.contains(&'^')).unwrap();

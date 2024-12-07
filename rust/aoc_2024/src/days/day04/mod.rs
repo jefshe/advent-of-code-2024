@@ -1,12 +1,12 @@
 use super::Answer;
-use crate::{AOCUpdate::*, BoxedAsync, TX};
+use crate::{BoxedAsync, Ev, ItemTX};
 mod part_a;
 mod part_b;
 use color_eyre::Result;
 
-async fn run(tx: TX) -> Result<()> {
+async fn run(tx: ItemTX) -> Result<()> {
     let (idx, s) = tx;
-    s.send(Done(
+    s.send(Ev::Done(
         idx,
         Answer {
             parta: Some(part_a::run()),
@@ -16,6 +16,6 @@ async fn run(tx: TX) -> Result<()> {
     Ok(())
 }
 
-pub fn wrapped_run(tx: TX) -> BoxedAsync {
+pub fn wrapped_run(tx: ItemTX) -> BoxedAsync {
     Box::pin(run(tx))
 }

@@ -1,7 +1,7 @@
 use super::Answer;
-use crate::AOCUpdate::*;
 use crate::BoxedAsync;
-use crate::TX;
+use crate::Ev;
+use crate::ItemTX;
 mod part_a;
 mod part_b;
 use color_eyre::Result;
@@ -9,20 +9,18 @@ use color_eyre::Result;
 #[derive(Debug, Default)]
 pub struct Day6 {}
 
-pub async fn run(tx: TX) -> Result<()> {
-    let parta = part_a::run(&tx);
+pub async fn run(tx: ItemTX) -> Result<()> {
     let (idx, s) = tx;
-    println!("Day 6a: {}", parta);
-    s.send(Done(
+    s.send(Ev::Done(
         idx,
         Answer {
-            parta: Some(parta),
+            parta: Some(part_a::run()),
             partb: Some(part_b::run()),
         },
     ))?;
     Ok(())
 }
 
-pub fn wrapped_run(tx: TX) -> BoxedAsync {
+pub fn wrapped_run(tx: ItemTX) -> BoxedAsync {
     Box::pin(run(tx))
 }
