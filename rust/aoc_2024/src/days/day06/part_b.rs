@@ -30,7 +30,7 @@ pub fn run(tx: &mut ItemTX) -> String {
     tx.append(format!("chunking {:?}", now.elapsed())).unwrap();
     now = Instant::now();
     let ret = ans
-        .iter()
+        .par_iter()
         .filter(|g| is_loop(g, HashSet::new(), &pos, &D::Up))
         .count()
         .to_string();
@@ -54,10 +54,16 @@ pub fn is_loop(grid: &Griddy<char>, mut visited: HashSet<(XY, D)>, pos: &XY, fac
 
 #[cfg(test)]
 mod tests {
+    use tokio::sync::mpsc::unbounded_channel;
+
+    use crate::Ev;
+
     use super::*;
 
     #[test]
     fn it_works() {
-        run();
+        let (tx, _rx) = unbounded_channel::<Ev>();
+        let mut itx = (0, tx);
+        run(&mut itx);
     }
 }
