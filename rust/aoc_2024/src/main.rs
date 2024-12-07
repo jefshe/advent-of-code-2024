@@ -62,6 +62,7 @@ impl App {
             let ev = events.next().await?;
             self.update_state(ev);
         }
+        events.task.abort();
         Ok(())
     }
 
@@ -73,9 +74,9 @@ impl App {
             Ev::Run if let Some(i) = self.aoc_list.state.selected() => {
                 self.aoc_list.run(i, self.tx.clone())
             }
-            Ev::InProgress(i) => self.aoc_list.items[i].viz = Some(vec!["In Progress".to_string()]),
+            Ev::InProgress(i) => self.aoc_list.items[i].answer = RunState::InProgress,
             Ev::Render(i, txt) => self.aoc_list.items[i].viz = Some(txt),
-            Ev::Done(i, ans) => self.aoc_list.items[i].answer = Some(ans),
+            Ev::Done(i, ans) => self.aoc_list.items[i].answer = RunState::Done(ans),
             _ => {}
         }
     }

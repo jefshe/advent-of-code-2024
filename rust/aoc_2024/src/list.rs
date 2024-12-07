@@ -47,11 +47,17 @@ impl AOCList {
 }
 pub type BoxedAsync = Pin<Box<dyn Future<Output = Result<()>> + Send>>;
 pub type AsyncCall = fn(ItemTX) -> BoxedAsync;
+
+pub enum RunState {
+    InProgress,
+    Done(Answer),
+    NotRun,
+}
 pub struct AOCDay {
     pub title: String,
     pub runner: Option<AsyncCall>,
     pub viz: Option<Vec<String>>,
-    pub answer: Option<Answer>,
+    pub answer: RunState,
     pub task: Option<tokio::task::JoinHandle<()>>,
 }
 
@@ -60,7 +66,7 @@ impl AOCDay {
         Self {
             title: title.to_string(),
             viz: None,
-            answer: None,
+            answer: RunState::NotRun,
             runner: Some(runner),
             task: None,
         }
@@ -69,8 +75,8 @@ impl AOCDay {
         Self {
             title: title.to_string(),
             viz: None,
-            answer: None,
             runner: None,
+            answer: RunState::NotRun,
             task: None,
         }
     }
@@ -83,31 +89,26 @@ impl AOCDay {
                     fut.await.unwrap();
                 }));
             }
-            None => {
-                self.answer = Some(Answer::default());
-            }
+            None => (),
         }
     }
 
     pub fn render(&self, area: Rect, buf: &mut Buffer) {
+        Paragraph::new(match &self.answer {
+            RunState::Done(ans) => vec![
+                Line::styled(format!("Part A: {:?}", ans.partb), ANSWER_TEXT_COLOR),
+                Line::styled(format!("Part B: {:?}", ans.partb), ANSWER_TEXT_COLOR),
+            ],
+            RunState::InProgress => vec![Line::styled("In Progress...", INPROGRESS_TEXT_COLOR)],
+            RunState::NotRun => vec![],
+        })
+        .block(block("Answer"))
+        .wrap(Wrap { trim: false })
+        .render(area, buf);
         if let Some(txt) = &self.viz {
-            let [answer, viz] =
-                Layout::horizontal([Constraint::Fill(ANSWER_RATIO), Constraint::Fill(VIZ_RATIO)])
-                    .areas(area);
-
-            Paragraph::new(match &self.answer {
-                Some(ans) => vec![
-                    Line::styled(format!("Part A: {:?}", ans.partb), ANSWER_TEXT_COLOR),
-                    Line::styled(format!("Part B: {:?}", ans.partb), ANSWER_TEXT_COLOR),
-                ],
-                None => vec![Line::styled("In Progress...", INPROGRESS_TEXT_COLOR)],
-            })
-            .block(block("Answer"))
-            .wrap(Wrap { trim: false })
-            .render(answer, buf);
             Paragraph::new(txt.iter().map(Line::raw).collect::<Vec<Line>>())
                 .block(block(""))
-                .render(viz, buf);
+                .render(area, buf);
         }
     }
 }
