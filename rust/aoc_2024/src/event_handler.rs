@@ -67,3 +67,9 @@ impl EventHandler {
         self.tx.clone()
     }
 }
+
+impl Drop for EventHandler {
+    fn drop(&mut self) {
+        self.task.abort();
+    }
+}

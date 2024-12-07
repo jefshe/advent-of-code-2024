@@ -127,3 +127,11 @@ impl From<&AOCDay> for ListItem<'_> {
         }
     }
 }
+
+impl Drop for AOCDay {
+    fn drop(&mut self) {
+        if let Some(task) = &self.task {
+            task.abort();
+        }
+    }
+}
