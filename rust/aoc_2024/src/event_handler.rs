@@ -12,6 +12,7 @@ pub type ItemTX = (usize, TX);
 pub enum Ev {
     InProgress(usize),
     Render(usize, Vec<String>),
+    RenderAppend(usize, Vec<String>),
     Done(usize, Answer),
     Up,
     Down,

@@ -2,22 +2,39 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::ops::{Index, IndexMut};
 use std::path::Path;
-pub fn parse_lines(day: &str) -> Vec<String> {
-    read_lines(format!("./input/{}", day))
+
+use regex::Regex;
+
+use crate::days::Answer;
+use crate::{Ev, ItemTX};
+
+pub fn parse_lines_iter(day: &str) -> impl Iterator<Item = String> {
+    read_lines(format!("./input/{day}"))
         .expect("Could not read file")
         .map(|line| line.expect("Could not read line"))
+}
+
+pub fn split_lines_iter(day: &str, re: &str) -> Vec<Vec<String>> {
+    read_lines(format!("./input/{day}"))
+        .expect("Could not read file")
+        .map(|line| {
+            let separator = Regex::new(re).expect("Invalid regex");
+            let unwrapped = &line.expect("Could not read line");
+            let split = separator.split(unwrapped).map(|s| s.to_string());
+            split.collect()
+        })
         .collect()
 }
 
 pub fn parse_chars(day: &str) -> Vec<Vec<char>> {
-    read_lines(format!("./input/{}", day))
+    read_lines(format!("./input/{day}"))
         .expect("Could not read file")
         .map(|line| line.expect("Could not read line").chars().collect())
         .collect()
 }
 
 pub fn parse_2_parts(day: &str) -> (Vec<String>, Vec<String>) {
-    let mut buf = read_lines(format!("./input/{}", day))
+    let mut buf = read_lines(format!("./input/{day}"))
         .expect("Could not read file")
         .map(|line| line.expect("Could not read line"));
     (

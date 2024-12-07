@@ -2,9 +2,9 @@ use crate::{block, days::*, gfx::*, Ev, ItemTX, TX};
 use color_eyre::Result;
 use ratatui::{
     buffer::Buffer,
-    layout::{Constraint, Layout, Rect},
+    layout::{Alignment, Rect},
     text::Line,
-    widgets::{ListItem, ListState, Paragraph, Widget, Wrap},
+    widgets::{ListItem, ListState, Padding, Paragraph, Widget, Wrap},
 };
 use std::{future::Future, pin::Pin};
 
@@ -94,9 +94,20 @@ impl AOCDay {
     }
 
     pub fn render(&self, area: Rect, buf: &mut Buffer) {
+        if let Some(txt) = &self.viz {
+            Paragraph::new(txt.iter().map(Line::raw).collect::<Vec<Line>>())
+                .block(block("Answer").padding(Padding::new(
+                    0,               // left
+                    0,               // right
+                    area.height / 4, // top
+                    0,               // bottom
+                )))
+                .alignment(Alignment::Center)
+                .render(area, buf);
+        }
         Paragraph::new(match &self.answer {
             RunState::Done(ans) => vec![
-                Line::styled(format!("Part A: {:?}", ans.partb), ANSWER_TEXT_COLOR),
+                Line::styled(format!("Part A: {:?}", ans.parta), ANSWER_TEXT_COLOR),
                 Line::styled(format!("Part B: {:?}", ans.partb), ANSWER_TEXT_COLOR),
             ],
             RunState::InProgress => vec![Line::styled("In Progress...", INPROGRESS_TEXT_COLOR)],
@@ -105,11 +116,6 @@ impl AOCDay {
         .block(block("Answer"))
         .wrap(Wrap { trim: false })
         .render(area, buf);
-        if let Some(txt) = &self.viz {
-            Paragraph::new(txt.iter().map(Line::raw).collect::<Vec<Line>>())
-                .block(block(""))
-                .render(area, buf);
-        }
     }
 }
 

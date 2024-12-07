@@ -18,11 +18,8 @@ pub const ANSWER_TEXT_COLOR: Color = GREEN.c500;
 pub const INPROGRESS_TEXT_COLOR: Color = YELLOW.c500;
 pub const INCOMPLETE_TEXT_FG_COLOR: Color = RED.c500;
 // Layout
-pub const TOP_RATIO: u16 = 1;
-pub const BOTTOM_RATIO: u16 = 1;
-
-pub const ANSWER_RATIO: u16 = 1;
-pub const VIZ_RATIO: u16 = 2;
+pub const TOP_RATIO: u16 = 2;
+pub const BOTTOM_RATIO: u16 = 4;
 
 pub fn block(title: &str) -> Block {
     Block::new()

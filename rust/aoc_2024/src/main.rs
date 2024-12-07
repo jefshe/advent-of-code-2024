@@ -76,6 +76,14 @@ impl App {
             }
             Ev::InProgress(i) => self.aoc_list.items[i].answer = RunState::InProgress,
             Ev::Render(i, txt) => self.aoc_list.items[i].viz = Some(txt),
+            Ev::RenderAppend(i, txt) => match self.aoc_list.items[i].viz {
+                Some(ref mut v) => {
+                    v.extend(txt);
+                }
+                None => {
+                    self.aoc_list.items[i].viz = Some(txt);
+                }
+            },
             Ev::Done(i, ans) => self.aoc_list.items[i].answer = RunState::Done(ans),
             _ => {}
         }
