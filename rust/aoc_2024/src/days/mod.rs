@@ -6,6 +6,12 @@ use ratatui::{
 };
 use std::time::Duration;
 
+pub mod day04;
+pub mod day05;
+pub mod day06;
+pub mod day07;
+pub mod day08;
+
 #[derive(Debug, Default, Clone)]
 pub struct Answer {
     pub parta: (String, Duration),
@@ -75,8 +81,3 @@ fn time_run<F: FnOnce() -> String>(cb: F) -> (String, Duration) {
     let duration = start.elapsed();
     (ans, duration)
 }
-
-pub mod day04;
-pub mod day05;
-pub mod day06;
-pub mod day07;
