@@ -1,8 +1,12 @@
+use std::collections::HashSet;
+
 use super::{time_run, Answer, TX};
 use crate::griddy::Griddy;
+use crate::point::Pt;
 use crate::BoxedAsync;
 use crate::{util::*, ItemTX};
 use color_eyre::Result;
+use itertools::Itertools;
 
 async fn run(mut tx: ItemTX) -> Result<()> {
     let parta = time_run(|| parta(&mut tx));
@@ -12,13 +16,76 @@ async fn run(mut tx: ItemTX) -> Result<()> {
 }
 
 pub fn parta(tx: &mut ItemTX) -> String {
-    let griddy = input();
-    tx.update(griddy.strings()).expect("Unable to update");
-    0.to_string()
+    let mut griddy = input();
+    let groups = griddy
+        .data
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| **c != '.')
+        .map(|(i, c)| (c, griddy.to_pt(i)))
+        .into_group_map();
+
+    let mut solutions = HashSet::<Pt>::new();
+    for (_, grp) in groups {
+        // tx.append(format!("{} {:?}", c, grp)).unwrap();
+        for pair in grp.as_slice().iter().combinations(2) {
+            let (a, b) = (pair[0], pair[1]);
+            let distance = *b - *a;
+            let above = *a - distance;
+            let below = *b + distance;
+            if griddy.check_pt(&above) {
+                solutions.insert(above);
+            }
+            if griddy.check_pt(&below) {
+                solutions.insert(below);
+            }
+        }
+    }
+    for i in &solutions {
+        griddy[i] = '#'
+    }
+
+    format!("{:?}", solutions.len())
 }
 
-pub fn partb(_tx: &mut ItemTX) -> String {
-    0.to_string()
+pub fn partb(tx: &mut ItemTX) -> String {
+    let mut griddy = input();
+    let groups = griddy
+        .data
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| **c != '.')
+        .map(|(i, c)| (c, griddy.to_pt(i)))
+        .into_group_map();
+
+    let mut solutions = HashSet::<Pt>::new();
+    for (_, grp) in groups {
+        // tx.append(format!("{} {:?}", c, grp)).unwrap();
+        for pair in grp.as_slice().iter().combinations(2) {
+            let (a, b) = (pair[0], pair[1]);
+            let distance = *b - *a;
+            solutions.insert(*a);
+            solutions.insert(*b);
+
+            let mut above = *a - distance;
+            let mut below = *b + distance;
+            while griddy.check_pt(&above) {
+                solutions.insert(above);
+                above -= distance;
+            }
+            while griddy.check_pt(&below) {
+                solutions.insert(below);
+                below += distance;
+            }
+        }
+    }
+    for i in &solutions {
+        griddy[i] = '#'
+    }
+
+    tx.update(griddy.strings()).unwrap();
+
+    format!("{:?}", solutions.len())
 }
 
 fn input() -> Griddy<char> {

@@ -1,7 +1,8 @@
 use regex::Regex;
+use std::fmt;
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::ops::{Index, IndexMut};
+use std::ops::{Add, Index, IndexMut, Sub};
 use std::path::Path;
 
 pub fn parse_lines_iter(day: &str) -> impl Iterator<Item = String> {
@@ -57,7 +58,7 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+#[derive(Eq, PartialEq, Hash, Clone, Copy)]
 pub struct XY {
     pub x: usize,
     pub y: usize,
@@ -76,6 +77,19 @@ pub enum D {
 }
 
 impl D {
+    pub fn neg(&self) -> Self {
+        match self {
+            D::Up => D::Down,
+            D::Down => D::Up,
+            D::Left => D::Right,
+            D::Right => D::Left,
+            D::UpLeft => D::UpLeft,
+            D::UpRight => D::DownLeft,
+            D::DownLeft => D::UpRight,
+            D::DownRight => D::UpLeft,
+        }
+    }
+
     pub fn cw(&self) -> D {
         match self {
             D::Up => D::Right,
@@ -194,6 +208,35 @@ impl<T> Index<&XY> for Grid<T> {
 impl<T> IndexMut<&XY> for Grid<T> {
     fn index_mut(&mut self, index: &XY) -> &mut Self::Output {
         &mut self[index.y][index.x]
+    }
+}
+
+impl Add<D> for XY {
+    type Output = Self;
+    fn add(self, other: D) -> Self {
+        self.dir(&other)
+    }
+}
+
+impl Sub<D> for XY {
+    type Output = Self;
+    fn sub(self, other: D) -> Self {
+        self.dir(&other.neg())
+    }
+}
+
+impl From<(usize, usize)> for XY {
+    fn from(pair: (usize, usize)) -> Self {
+        Self {
+            x: pair.0,
+            y: pair.1,
+        }
+    }
+}
+
+impl fmt::Debug for XY {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
     }
 }
 

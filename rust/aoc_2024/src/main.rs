@@ -16,6 +16,7 @@ pub mod event_handler;
 pub mod gfx;
 pub mod griddy;
 pub mod list;
+pub mod point;
 pub mod util;
 
 use crate::event_handler::*;

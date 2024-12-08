@@ -6,7 +6,7 @@ use std::{
 
 use ratatui::{text::Line, widgets::Paragraph};
 
-use crate::util::XY;
+use crate::{point::Pt, util::XY};
 
 #[derive(Debug, Clone)]
 pub struct Griddy<T> {
@@ -34,6 +34,10 @@ impl<T: Eq + ToString> Griddy<T> {
         xy.x < self.width && xy.y < self.height
     }
 
+    pub fn check_pt(&self, pt: &Pt) -> bool {
+        pt.x >= 0 && pt.y >= 0 && pt.x < self.width as i32 && pt.y < self.height as i32
+    }
+
     pub fn find(&self, value: &T) -> Option<XY> {
         self.data.iter().position(|x| x == value).map(|i| XY {
             x: i % self.width,
@@ -45,6 +49,17 @@ impl<T: Eq + ToString> Griddy<T> {
         XY {
             x: i % self.width,
             y: i / self.width,
+        }
+    }
+
+    pub fn to_pair(&self, i: usize) -> (usize, usize) {
+        (i % self.width, i / self.width)
+    }
+
+    pub fn to_pt(&self, i: usize) -> Pt {
+        Pt {
+            x: (i % self.width) as i32,
+            y: (i / self.width) as i32,
         }
     }
 
@@ -74,6 +89,19 @@ impl<T> IndexMut<&XY> for Griddy<T> {
     }
 }
 
+impl<T> Index<&Pt> for Griddy<T> {
+    type Output = T;
+    fn index(&self, pt: &Pt) -> &Self::Output {
+        &self.data[(pt.y as usize) * self.height + (pt.x as usize)]
+    }
+}
+
+impl<T> IndexMut<&Pt> for Griddy<T> {
+    fn index_mut(&mut self, pt: &Pt) -> &mut Self::Output {
+        &mut self.data[(pt.y as usize) * self.height + (pt.x as usize)]
+    }
+}
+
 impl<T: Display> fmt::Display for Griddy<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for y in 0..self.height {
@@ -83,5 +111,18 @@ impl<T: Display> fmt::Display for Griddy<T> {
             writeln!(f)?;
         }
         Ok(())
+    }
+}
+
+impl<T> Index<&(usize, usize)> for Griddy<T> {
+    type Output = T;
+    fn index(&self, pair: &(usize, usize)) -> &Self::Output {
+        &self.data[pair.1 * self.height + pair.0]
+    }
+}
+
+impl<T> IndexMut<&(usize, usize)> for Griddy<T> {
+    fn index_mut(&mut self, pair: &(usize, usize)) -> &mut Self::Output {
+        &mut self.data[pair.1 * self.height + pair.0]
     }
 }
