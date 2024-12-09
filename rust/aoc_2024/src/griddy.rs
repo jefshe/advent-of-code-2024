@@ -1,12 +1,9 @@
+use crate::{point::Pt, util::XY};
 use core::fmt;
 use std::{
     fmt::Display,
     ops::{Index, IndexMut},
 };
-
-use ratatui::{text::Line, widgets::Paragraph};
-
-use crate::{point::Pt, util::XY};
 
 #[derive(Debug, Clone)]
 pub struct Griddy<T> {

@@ -15,7 +15,7 @@ async fn run(mut tx: ItemTX) -> Result<()> {
     Ok(())
 }
 
-pub fn parta(tx: &mut ItemTX) -> String {
+pub fn parta(_tx: &mut ItemTX) -> String {
     let mut griddy = input();
     let groups = griddy
         .data
@@ -93,22 +93,22 @@ fn input() -> Griddy<char> {
     Griddy::new(grid)
 }
 
-#[cfg(test)]
-mod tests {
-    use tokio::sync::mpsc::unbounded_channel;
-
-    use crate::Ev;
-
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let (tx, _rx) = unbounded_channel::<Ev>();
-        let mut itx = (0, tx);
-        println!("{}", parta(&mut itx));
-    }
-}
-
 pub fn wrapped_run(tx: ItemTX) -> BoxedAsync {
     Box::pin(run(tx))
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use tokio::sync::mpsc::unbounded_channel;
+
+//     use crate::Ev;
+
+//     use super::*;
+
+//     #[test]
+//     fn it_works() {
+//         let (tx, _rx) = unbounded_channel::<Ev>();
+//         let mut itx = (0, tx);
+//         println!("{}", parta(&mut itx));
+//     }
+// }

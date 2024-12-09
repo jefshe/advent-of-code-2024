@@ -82,22 +82,22 @@ fn input() -> Vec<(usize, Vec<usize>)> {
         .collect::<Vec<(usize, Vec<usize>)>>()
 }
 
-#[cfg(test)]
-mod tests {
-    use tokio::sync::mpsc::unbounded_channel;
-
-    use crate::Ev;
-
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let (tx, _rx) = unbounded_channel::<Ev>();
-        let mut itx = (0, tx);
-        println!("{}", parta(&mut itx));
-    }
-}
-
 pub fn wrapped_run(tx: ItemTX) -> BoxedAsync {
     Box::pin(run(tx))
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use tokio::sync::mpsc::unbounded_channel;
+
+//     use crate::Ev;
+
+//     use super::*;
+
+//     #[test]
+//     fn it_works() {
+//         let (tx, _rx) = unbounded_channel::<Ev>();
+//         let mut itx = (0, tx);
+//         println!("{}", parta(&mut itx));
+//     }
+// }

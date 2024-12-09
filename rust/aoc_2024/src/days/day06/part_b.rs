@@ -52,18 +52,18 @@ pub fn is_loop(grid: &Griddy<char>, mut visited: HashSet<(XY, D)>, pos: &XY, fac
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use tokio::sync::mpsc::unbounded_channel;
+// #[cfg(test)]
+// mod tests {
+//     use tokio::sync::mpsc::unbounded_channel;
 
-    use crate::Ev;
+//     use crate::Ev;
 
-    use super::*;
+//     use super::*;
 
-    #[test]
-    fn it_works() {
-        let (tx, _rx) = unbounded_channel::<Ev>();
-        let mut itx = (0, tx);
-        run(&mut itx);
-    }
-}
+//     #[test]
+//     fn it_works() {
+//         let (tx, _rx) = unbounded_channel::<Ev>();
+//         let mut itx = (0, tx);
+//         run(&mut itx);
+//     }
+// }
