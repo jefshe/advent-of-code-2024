@@ -68,14 +68,14 @@ pub fn partb(tx: &mut ItemTX) -> String {
     }
     let (mut i, mut j) = (0, disk.len() - 1);
     while i != disk.len() {
-        // println!("{:?}:{:?} {:?}:{:?}", i, j, disk[i], disk[j]);
+        println!("{:?}:{:?} {:?}:{:?}", i, j, disk[i], disk[j]);
         match (disk[i], disk[j]) {
             (_, _) if i >= j => {
-                i += 1;
+                i = 0;
                 j = disk.len() - 1;
             }
-            (_, (-1, _)) => j -= 1,
             ((id, _), _) if id != -1 => i += 1,
+            (_, (-1, _)) => j -= 1,
             ((-1, empty_size), (_, size)) if empty_size < size => j -= 1,
             ((-1, empty_size), (id, size)) if empty_size == size => {
                 println!("{id} -> {i}");
@@ -92,7 +92,7 @@ pub fn partb(tx: &mut ItemTX) -> String {
                 disk[j] = (-1, size);
                 disk.insert(i, (id, size));
                 disk[i + 1] = (-1, empty_size - size);
-                i += 1;
+                i += 2;
                 j = disk.len() - 1;
             }
             (a, b) => panic!("i: {:?}, j: {:?}", a, b),
