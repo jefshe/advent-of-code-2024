@@ -67,63 +67,71 @@ pub fn partb(tx: &mut ItemTX) -> String {
         }
     }
     let (mut i, mut j) = (0, disk.len() - 1);
-    while i != disk.len() {
-        println!("{:?}:{:?} {:?}:{:?}", i, j, disk[i], disk[j]);
+    while j > 0 {
         match (disk[i], disk[j]) {
             (_, _) if i >= j => {
                 i = 0;
-                j = disk.len() - 1;
+                j -= 1;
             }
-            ((id, _), _) if id != -1 => i += 1,
             (_, (-1, _)) => j -= 1,
-            ((-1, empty_size), (_, size)) if empty_size < size => j -= 1,
+            ((id, _), _) if id != -1 => i += 1,
+
+            ((-1, empty_size), (_, size)) if empty_size < size => i += 1,
+
             ((-1, empty_size), (id, size)) if empty_size == size => {
-                println!("{id} -> {i}");
+                // println!("{id} -> {i}");
                 disk[i] = (id, size);
                 disk[j] = (-1, size);
-                i += 1;
-                j = disk.len() - 1;
+                i = 0;
+                j -= 1;
             }
             ((-1, empty_size), (id, size)) if empty_size > size => {
-                println!(
-                    "{id} -> {i} (remander: {empty_size} - {size} = {})",
-                    empty_size - size
-                );
+                // println!(
+                //     "{id} -> {i} (remander: {empty_size} - {size} = {})",
+                //     empty_size - size
+                // );
                 disk[j] = (-1, size);
                 disk.insert(i, (id, size));
                 disk[i + 1] = (-1, empty_size - size);
-                i += 2;
-                j = disk.len() - 1;
+                i += 1;
+                j -= 1;
             }
             (a, b) => panic!("i: {:?}, j: {:?}", a, b),
         }
     }
 
-    tx.update(vec![disk
+    let expanded: Vec<&i32> = disk
         .iter()
-        .map(|(id, size)| {
-            if *id == -1 {
-                "., ".repeat(*size)
-            } else {
-                format!("{}, ", id).repeat(*size)
-            }
-        })
-        .collect::<Vec<String>>()
-        .join("")])
-        .unwrap();
+        .map(|(id, size)| vec![id; *size])
+        .flatten()
+        .collect::<Vec<_>>();
+    // println!("{:?}", expanded);
 
     format!(
         "{:?}",
-        disk.iter()
+        // disk.iter()
+        //     .fold((0, 0), |(total, curr_idx), (id, size)| if *id > 0 {
+        //         println!(
+        //             "id: {id} size: {size} curr_idx: {curr_idx} {}",
+        //             size * (*id as usize) * (curr_idx + size + 1) / 2
+        //         );
+        //         (
+        //             total + ((*id as usize) * size * (curr_idx + size) / 2),
+        //             curr_idx + size,
+        //         )
+        //     } else {
+        //         (total, curr_idx + size)
+        //     })
+        expanded
+            .iter()
             .enumerate()
-            .filter(|(i, &(id, size))| id >= 0)
-            .map(|(i, &(id, size))| if id > 0 { i * (id as usize) * size } else { 0 })
+            .map(|(i, &&x)| if x > 0 { i * (x as usize) } else { 0 })
             .sum::<usize>()
     )
 }
 
 fn input() -> Vec<usize> {
-    parse_lines_iter("day09_ex")
+    parse_lines_iter("day09")
         .next()
         .unwrap()
         .chars()
@@ -147,6 +155,6 @@ mod tests {
     fn it_works() {
         let (tx, _rx) = unbounded_channel::<Ev>();
         let mut itx = (0, tx);
-        partb(&mut itx);
+        println!("{}", partb(&mut itx));
     }
 }
