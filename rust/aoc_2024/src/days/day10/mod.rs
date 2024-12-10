@@ -7,16 +7,17 @@ use crate::util::D::*;
 use crate::BoxedAsync;
 use crate::{util::*, ItemTX};
 use color_eyre::Result;
+use rayon::prelude::*;
 
 async fn run(mut tx: ItemTX) -> Result<()> {
-    let parta = time_run(|| parta(&mut tx));
-    let partb = time_run(|| partb(&mut tx));
+    let griddy = input();
+    let parta = time_run(|| parta(&griddy, &mut tx));
+    let partb = time_run(|| partb(&griddy, &mut tx));
     tx.done(Answer { parta, partb })?;
     Ok(())
 }
 
-pub fn parta(_tx: &mut ItemTX) -> String {
-    let griddy = input();
+pub fn parta(griddy: &Griddy<char>, _tx: &mut ItemTX) -> String {
     let mut score = 0;
     for pt in griddy.find_all(&'0') {
         let mut soln = HashSet::new();
@@ -26,14 +27,12 @@ pub fn parta(_tx: &mut ItemTX) -> String {
     format!("{:?}", score)
 }
 
-pub fn partb(_tx: &mut ItemTX) -> String {
-    let griddy = input();
-
+pub fn partb(griddy: &Griddy<char>, _tx: &mut ItemTX) -> String {
     format!(
         "{:?}",
         griddy
             .find_all(&'0')
-            .iter()
+            .par_iter()
             .map(|pt| count_hikes(&griddy, pt))
             .sum::<usize>()
     )
@@ -56,15 +55,11 @@ pub fn count_hikes(griddy: &Griddy<char>, curr: &Pt) -> usize {
     if griddy[curr] == '9' {
         return 1;
     }
-
-    let mut count = 0;
-    for d in [Up, Down, Left, Right] {
-        let next = *curr + d;
-        if griddy.check(&next) && griddy[&next] as i32 - griddy[curr] as i32 == 1 {
-            count += count_hikes(griddy, &next)
-        }
-    }
-    count
+    [Up, Down, Left, Right].iter()
+        .map(|d| *curr + *d)
+        .filter(|pt| griddy.check(pt) && griddy[pt] as i32 - griddy[curr] as i32 == 1)
+        .map(|pt| count_hikes(griddy, &pt))
+        .sum()
 }
 
 pub fn input() -> Griddy<char> {

@@ -64,7 +64,7 @@ pub struct XY {
     pub y: usize,
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum D {
     Up,
     Down,
