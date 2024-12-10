@@ -33,10 +33,10 @@ pub fn parta(_tx: &mut ItemTX) -> String {
             let distance = *b - *a;
             let above = *a - distance;
             let below = *b + distance;
-            if griddy.check_pt(&above) {
+            if griddy.check(&above) {
                 solutions.insert(above);
             }
-            if griddy.check_pt(&below) {
+            if griddy.check(&below) {
                 solutions.insert(below);
             }
         }
@@ -69,11 +69,11 @@ pub fn partb(tx: &mut ItemTX) -> String {
 
             let mut above = *a - distance;
             let mut below = *b + distance;
-            while griddy.check_pt(&above) {
+            while griddy.check(&above) {
                 solutions.insert(above);
                 above -= distance;
             }
-            while griddy.check_pt(&below) {
+            while griddy.check(&below) {
                 solutions.insert(below);
                 below += distance;
             }

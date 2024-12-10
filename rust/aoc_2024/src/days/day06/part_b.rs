@@ -14,7 +14,7 @@ pub fn run(tx: &mut ItemTX) -> String {
     let mut grid = parse_chars(INPUT_DAY);
     grid = bigga(grid, 1, 'Z');
     let griddy = Griddy::new(grid);
-    let pos = griddy.find(&'^').unwrap();
+    let pos = griddy.find_xy(&'^').unwrap();
     let ans = griddy
         .data
         .iter()

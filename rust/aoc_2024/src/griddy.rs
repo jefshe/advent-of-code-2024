@@ -27,19 +27,35 @@ impl<T: Eq + ToString> Griddy<T> {
         }
     }
 
-    pub fn check(&self, xy: &XY) -> bool {
-        xy.x < self.width && xy.y < self.height
-    }
-
-    pub fn check_pt(&self, pt: &Pt) -> bool {
+    pub fn check(&self, pt: &Pt) -> bool {
         pt.x >= 0 && pt.y >= 0 && pt.x < self.width as i32 && pt.y < self.height as i32
     }
 
-    pub fn find(&self, value: &T) -> Option<XY> {
-        self.data.iter().position(|x| x == value).map(|i| XY {
-            x: i % self.width,
-            y: i / self.width,
-        })
+    pub fn find(&self, value: &T) -> Option<Pt> {
+        self.data
+            .iter()
+            .position(|x| x == value)
+            .map(|i| self.to_pt(i))
+    }
+
+    pub fn find_all(&self, value: &T) -> Vec<Pt> {
+        self.data
+            .iter()
+            .enumerate()
+            .filter(|(_, x)| *x == value)
+            .map(|(i, _)| self.to_pt(i))
+            .collect()
+    }
+
+    pub fn check_xy(&self, xy: &XY) -> bool {
+        xy.x < self.width && xy.y < self.height
+    }
+
+    pub fn find_xy(&self, value: &T) -> Option<XY> {
+        self.data
+            .iter()
+            .position(|x| x == value)
+            .map(|i| self.to_xy(i))
     }
 
     pub fn to_xy(&self, i: usize) -> XY {
