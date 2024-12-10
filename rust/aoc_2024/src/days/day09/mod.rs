@@ -54,7 +54,7 @@ pub fn parta(_tx: &mut ItemTX) -> String {
     )
 }
 
-pub fn partb(tx: &mut ItemTX) -> String {
+pub fn partb(_tx: &mut ItemTX) -> String {
     let mut next_file_id = 0;
     let compressed = input();
     let mut disk = Vec::<(i32, usize)>::new();
@@ -67,66 +67,47 @@ pub fn partb(tx: &mut ItemTX) -> String {
         }
     }
     let (mut i, mut j) = (0, disk.len() - 1);
+    let last_j = 999999;
     while j > 0 {
         match (disk[i], disk[j]) {
+            (_, (-1, _)) => j -= 1,
+            (_, (id, _)) if (id >= last_j) => j -= 1,
             (_, _) if i >= j => {
                 i = 0;
                 j -= 1;
             }
-            (_, (-1, _)) => j -= 1,
             ((id, _), _) if id != -1 => i += 1,
-
             ((-1, empty_size), (_, size)) if empty_size < size => i += 1,
 
             ((-1, empty_size), (id, size)) if empty_size == size => {
-                // println!("{id} -> {i}");
                 disk[i] = (id, size);
                 disk[j] = (-1, size);
                 i = 0;
                 j -= 1;
             }
             ((-1, empty_size), (id, size)) if empty_size > size => {
-                // println!(
-                //     "{id} -> {i} (remander: {empty_size} - {size} = {})",
-                //     empty_size - size
-                // );
                 disk[j] = (-1, size);
                 disk.insert(i, (id, size));
                 disk[i + 1] = (-1, empty_size - size);
-                i += 1;
+                i = 0;
                 j -= 1;
             }
             (a, b) => panic!("i: {:?}, j: {:?}", a, b),
         }
     }
 
-    let expanded: Vec<&i32> = disk
-        .iter()
-        .map(|(id, size)| vec![id; *size])
-        .flatten()
-        .collect::<Vec<_>>();
-    // println!("{:?}", expanded);
-
     format!(
         "{:?}",
-        // disk.iter()
-        //     .fold((0, 0), |(total, curr_idx), (id, size)| if *id > 0 {
-        //         println!(
-        //             "id: {id} size: {size} curr_idx: {curr_idx} {}",
-        //             size * (*id as usize) * (curr_idx + size + 1) / 2
-        //         );
-        //         (
-        //             total + ((*id as usize) * size * (curr_idx + size) / 2),
-        //             curr_idx + size,
-        //         )
-        //     } else {
-        //         (total, curr_idx + size)
-        //     })
-        expanded
-            .iter()
-            .enumerate()
-            .map(|(i, &&x)| if x > 0 { i * (x as usize) } else { 0 })
-            .sum::<usize>()
+        disk.iter()
+            .fold((0, 0), |(total, curr_idx), (id, size)| if *id > 0 {
+                (
+                    total + ((*id as usize) * size * (2 * curr_idx + size - 1)) / 2,
+                    curr_idx + size,
+                )
+            } else {
+                (total, curr_idx + size)
+            })
+            .0
     )
 }
 
