@@ -58,6 +58,10 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
+pub fn digit_count(input: usize) -> usize {
+    (0..).take_while(|i| 10_usize.pow(*i) <= input).count()
+}
+
 #[derive(Eq, PartialEq, Hash, Clone, Copy)]
 pub struct XY {
     pub x: usize,
