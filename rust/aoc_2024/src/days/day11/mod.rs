@@ -1,7 +1,13 @@
 use super::{time_run, Answer, TX};
 use crate::BoxedAsync;
 use crate::{util::*, ItemTX};
+use std::collections::HashMap;
 use color_eyre::Result;
+
+
+const MAX_BLINKS: usize = 75;
+type Blink = usize;
+type Cache = HashMap<(usize, Blink), usize>;
 
 async fn run(mut tx: ItemTX) -> Result<()> {
     let parta = time_run(|| parta(&mut tx));
@@ -11,42 +17,41 @@ async fn run(mut tx: ItemTX) -> Result<()> {
 }
 
 pub fn parta(_tx: &mut ItemTX) -> String {
-    let mut stones = input();
-    blink(&mut stones, 25);
-    format!("{:?}", stones.len())
+    let stones = input();
+    let mut cache: Cache = HashMap::new();
+    cache.insert((0,1), 1);
+    cache.insert((1,1), 1);
+    format!("{:?}", stones.iter().map(|s| blink(*s, 25, &mut cache)).sum::<usize>())
 }
-
 pub fn partb(_tx: &mut ItemTX) -> String {
-    let mut stones = input();
-    blink(&mut stones, 75);
-    format!("{:?}", stones.len())
+    let stones = input();
+    let mut cache: Cache = HashMap::new();
+    cache.insert((0,1), 1);
+    cache.insert((1,1), 1);
+    format!("{:?}", stones.iter().map(|s| blink(*s, MAX_BLINKS, &mut cache)).sum::<usize>())
 }
 
-pub fn blink(stones: &mut Vec<usize>, blinks: usize) {
-    if blinks == 0 {
-        return;
+pub fn blink(stone: usize, blinks: usize, cache: &mut Cache) -> usize{
+    if blinks == 1 {
+        return if digit_count(stone) % 2 == 0 { 2 } else { 1 }
     }
-    let mut blinks_left = blinks;
 
-    while blinks_left > 0 {
-        let mut i = 0;
-        while i < stones.len() {
-            match stones[i] {
-                0 => stones[i] = 1,
-                num if digit_count(num) % 2 == 0 => {
-                    let split_at = digit_count(num) / 2;
-                    let left = num / 10_usize.pow(split_at as u32);
-                    let right = num % 10_usize.pow(split_at as u32);
-                    stones.insert(i, left);
-                    stones[i + 1] = right;
-                    i += 1
-                }
-                _ => stones[i] *= 2024,
-            }
-            i += 1
-        }
-        blinks_left -= 1
+    if let Some(ans) = cache.get(&(stone, blinks)) {
+        return *ans;
     }
+
+    let ans = match stone {
+        0 => blink(1, blinks - 1, cache),
+        num if digit_count(num) % 2 == 0 => {
+            let split_at = digit_count(num) / 2;
+            let left = num / 10_usize.pow(split_at as u32);
+            let right = num % 10_usize.pow(split_at as u32);
+            blink(left, blinks - 1, cache) + blink(right, blinks - 1, cache)
+        }
+        _ => blink(stone * 2024, blinks - 1, cache)
+    };
+    cache.insert((stone, blinks), ans);
+    ans
 }
 
 pub fn input() -> Vec<usize> {
