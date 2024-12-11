@@ -1,39 +1,48 @@
-use super::{time_run, Answer, TX};
-use crate::BoxedAsync;
-use crate::{util::*, ItemTX};
-use std::collections::HashMap;
+use super::*;
+use crate::util::*;
 use color_eyre::Result;
-
+use std::collections::HashMap;
 
 const MAX_BLINKS: usize = 75;
 type Blink = usize;
 type Cache = HashMap<(usize, Blink), usize>;
 
 async fn run(mut tx: ItemTX) -> Result<()> {
-    let parta = time_run(|| parta(&mut tx));
-    let partb = time_run(|| partb(&mut tx));
+    let stones = input();
+    let parta = time_run(|| parta(&stones));
+    let partb = time_run(|| partb(&stones));
     tx.done(Answer { parta, partb })?;
     Ok(())
 }
 
-pub fn parta(_tx: &mut ItemTX) -> String {
-    let stones = input();
+pub fn parta(stones: &[usize]) -> String {
     let mut cache: Cache = HashMap::new();
-    cache.insert((0,1), 1);
-    cache.insert((1,1), 1);
-    format!("{:?}", stones.iter().map(|s| blink(*s, 25, &mut cache)).sum::<usize>())
+    cache.insert((0, 1), 1);
+    cache.insert((1, 1), 1);
+    format!(
+        "{:?}",
+        stones
+            .iter()
+            .map(|s| blink(*s, 25, &mut cache))
+            .sum::<usize>()
+    )
 }
-pub fn partb(_tx: &mut ItemTX) -> String {
-    let stones = input();
+pub fn partb(stones: &[usize]) -> String {
     let mut cache: Cache = HashMap::new();
-    cache.insert((0,1), 1);
-    cache.insert((1,1), 1);
-    format!("{:?}", stones.iter().map(|s| blink(*s, MAX_BLINKS, &mut cache)).sum::<usize>())
+    cache.insert((0, 1), 1);
+    cache.insert((1, 1), 1);
+    format!(
+        "{:?}",
+        stones
+            .iter()
+            .map(|s| blink(*s, MAX_BLINKS, &mut cache))
+            .sum::<usize>()
+    )
 }
 
-pub fn blink(stone: usize, blinks: usize, cache: &mut Cache) -> usize{
+pub fn blink(stone: usize, blinks: usize, cache: &mut Cache) -> usize {
     if blinks == 1 {
-        return if digit_count(stone) % 2 == 0 { 2 } else { 1 }
+        return if digit_count(stone) % 2 == 0 { 2 } else { 1 };
     }
 
     if let Some(ans) = cache.get(&(stone, blinks)) {
@@ -48,7 +57,7 @@ pub fn blink(stone: usize, blinks: usize, cache: &mut Cache) -> usize{
             let right = num % 10_usize.pow(split_at as u32);
             blink(left, blinks - 1, cache) + blink(right, blinks - 1, cache)
         }
-        _ => blink(stone * 2024, blinks - 1, cache)
+        _ => blink(stone * 2024, blinks - 1, cache),
     };
     cache.insert((stone, blinks), ans);
     ans
@@ -67,20 +76,4 @@ pub fn input() -> Vec<usize> {
 
 pub fn wrapped_run(tx: ItemTX) -> BoxedAsync {
     Box::pin(run(tx))
-}
-
-#[cfg(test)]
-mod tests {
-    use tokio::sync::mpsc::unbounded_channel;
-
-    use crate::Ev;
-
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let (tx, _rx) = unbounded_channel::<Ev>();
-        let mut itx = (0, tx);
-        println!("{}", partb(&mut itx));
-    }
 }

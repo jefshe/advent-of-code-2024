@@ -1,12 +1,10 @@
-use crate::{block, days::*, gfx::*, Ev, ItemTX, TX};
-use color_eyre::Result;
+use crate::{block, days::*, gfx::*, Ev, TX};
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Rect},
     text::Line,
     widgets::{ListItem, ListState, Padding, Paragraph, Widget, Wrap},
 };
-use std::{future::Future, pin::Pin};
 
 pub struct AOCList {
     pub items: Vec<AOCDay>,
@@ -45,9 +43,6 @@ impl AOCList {
         self.items[i].run((i, tx));
     }
 }
-pub type BoxedAsync = Pin<Box<dyn Future<Output = Result<()>> + Send>>;
-pub type AsyncCall = fn(ItemTX) -> BoxedAsync;
-
 pub enum RunState {
     InProgress,
     Done(Answer),
@@ -82,14 +77,11 @@ impl AOCDay {
     }
 
     pub fn run(&mut self, tx: ItemTX) {
-        match self.runner {
-            Some(r) => {
-                let fut = r(tx);
-                self.task = Some(tokio::spawn(async move {
-                    fut.await.unwrap();
-                }));
-            }
-            None => (),
+        if let Some(r) = self.runner {
+            let fut = r(tx);
+            self.task = Some(tokio::spawn(async move {
+                fut.await.unwrap();
+            }));
         }
     }
 

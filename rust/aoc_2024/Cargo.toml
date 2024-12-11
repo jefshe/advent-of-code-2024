@@ -14,3 +14,18 @@ ratatui = "0.29.0"
 rayon = "1.10.0"
 regex = "1.11.1"
 tokio = { version = "1.42.0", features = ["full"] }
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[lib]
+name = "aoc_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "aoc"
+path = "src/main.rs"
+
+[[bench]]
+name = "aoc"
+harness = false

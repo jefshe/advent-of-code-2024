@@ -7,7 +7,6 @@ use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 
 pub type TX = UnboundedSender<Ev>;
 pub type RX = UnboundedReceiver<Ev>;
-pub type ItemTX = (usize, TX);
 
 pub enum Ev {
     InProgress(usize),
@@ -66,6 +65,12 @@ impl EventHandler {
 
     pub async fn tx(&self) -> TX {
         self.tx.clone()
+    }
+}
+
+impl Default for EventHandler {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

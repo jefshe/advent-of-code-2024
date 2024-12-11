@@ -1,9 +1,5 @@
-use super::time_run;
-use super::Answer;
-use super::TX;
+use super::*;
 use crate::util::parse_2_parts;
-use crate::BoxedAsync;
-use crate::ItemTX;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 mod part_a;
@@ -43,11 +39,7 @@ fn input() -> (Rulebook, Vec<Vec<u32>>) {
 
     let seqs: Vec<Vec<u32>> = seqs_part
         .into_iter()
-        .map(|l| {
-            l.split(",")
-                .map(|n| n.parse().expect(&format!("cannot parse {n}")))
-                .collect()
-        })
+        .map(|l| l.split(",").map(|n| n.parse().unwrap()).collect())
         .collect();
     (rulebook, seqs)
 }

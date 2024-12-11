@@ -1,6 +1,5 @@
-use super::{time_run, Answer, TX};
-use crate::BoxedAsync;
-use crate::{util::*, ItemTX};
+use super::*;
+use crate::util::*;
 use color_eyre::Result;
 
 async fn run(mut tx: ItemTX) -> Result<()> {
@@ -16,7 +15,7 @@ pub fn parta(_tx: &mut ItemTX) -> String {
     let mut disk = vec![-1; 100000];
     let mut size: usize = 0;
     for (i, s) in compressed.iter().enumerate() {
-        let new_size = size + (*s as usize);
+        let new_size = size + *s;
         if i % 2 == 0 {
             disk[size..new_size].fill(next_file_id);
             next_file_id += 1;

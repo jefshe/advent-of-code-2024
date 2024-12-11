@@ -1,12 +1,10 @@
-use std::collections::HashSet;
-
-use super::{time_run, Answer, TX};
+use super::*;
 use crate::griddy::Griddy;
 use crate::point::Pt;
-use crate::BoxedAsync;
-use crate::{util::*, ItemTX};
+use crate::util::*;
 use color_eyre::Result;
 use itertools::Itertools;
+use std::collections::HashSet;
 
 async fn run(mut tx: ItemTX) -> Result<()> {
     let parta = time_run(|| parta(&mut tx));

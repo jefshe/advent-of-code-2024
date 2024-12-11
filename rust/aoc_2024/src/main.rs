@@ -1,6 +1,11 @@
 #![feature(let_chains)]
 #![feature(if_let_guard)]
 #![feature(duration_millis_float)]
+extern crate aoc_lib;
+pub mod gfx;
+pub mod list;
+
+use aoc_lib::*;
 use color_eyre::Result;
 use ratatui::{
     buffer::Buffer,
@@ -10,14 +15,6 @@ use ratatui::{
     DefaultTerminal,
 };
 use tokio::{self, runtime::Builder};
-
-pub mod days;
-pub mod event_handler;
-pub mod gfx;
-pub mod griddy;
-pub mod list;
-pub mod point;
-pub mod util;
 
 use crate::event_handler::*;
 use crate::gfx::*;
