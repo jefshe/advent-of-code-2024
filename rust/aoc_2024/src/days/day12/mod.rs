@@ -7,31 +7,37 @@ use color_eyre::Result;
 const FILE: &str = "day12";
 
 async fn run(mut tx: ItemTX) -> Result<()> {
-    let griddy = input();
-    let parta = time_run(|| parta(&griddy));
-    let partb = time_run(|| partb(&griddy));
+    let mut griddy = input();
+    let parta = time_run(|| parta(&mut griddy));
+    let partb = time_run(|| partb(&mut griddy));
     tx.done(Answer { parta, partb })?;
     Ok(())
 }
 
-pub fn parta(griddy: &Griddy<char>) -> String {
+pub fn parta(griddy: &mut Griddy<char>) -> String {
     let mut visited = HashSet::new();
-    // for pt in griddy.pts() {
-    //     let ans = grow(griddy, pt, &mut visited);
-    // }
-
     format!(
         "{}",
         griddy
             .pts()
             .into_iter()
-            .map(|pt| grow(griddy, pt, &mut visited))
+            .map(|pt| grow_a(griddy, pt, &mut visited))
             .map(|(area, perimeter)| area * perimeter)
             .sum::<usize>()
     )
 }
+pub fn partb(griddy: &mut Griddy<char>) -> String {
+    let mut visited = HashSet::new();
+    let pts = griddy.pts().into_iter().collect::<Vec<Pt>>();
+    let ans = pts
+        .into_iter()
+        .map(|pt| grow_b(griddy, pt, &mut visited))
+        .map(|(area, perimeter)| area * perimeter)
+        .sum::<usize>();
+    format!("{}", ans)
+}
 
-pub fn grow(griddy: &Griddy<char>, pt: Pt, visited: &mut HashSet<Pt>) -> (usize, usize) {
+pub fn grow_b(griddy: &mut Griddy<char>, pt: Pt, visited: &mut HashSet<Pt>) -> (usize, usize) {
     let mut stack = vec![pt];
     let mut area = 0;
     let mut perimeter = 0;
@@ -45,6 +51,40 @@ pub fn grow(griddy: &Griddy<char>, pt: Pt, visited: &mut HashSet<Pt>) -> (usize,
             let next = pt + d;
             if griddy.check(&next) && griddy[&next] == griddy[&pt] {
                 stack.push(next);
+            }
+
+            let neighbour_d = match d {
+                Up | Down => [Left, Right],
+                Left | Right => [Up, Down],
+                _ => panic!("unexpected"),
+            };
+
+            for d2 in neighbour_d {
+                let neighbour = pt + d2;
+                if !griddy.check(&neighbour) || griddy[&neighbour] != griddy[&pt] {
+                    griddy[&pt] = '!';
+                    perimeter += 1
+                }
+            }
+        }
+    }
+    (area, perimeter)
+}
+
+pub fn grow_a(griddy: &Griddy<char>, pt: Pt, visited: &mut HashSet<Pt>) -> (usize, usize) {
+    let mut stack = vec![pt];
+    let mut area = 0;
+    let mut perimeter = 0;
+    while let Some(pt) = stack.pop() {
+        if visited.contains(&pt) {
+            continue;
+        }
+        visited.insert(pt);
+        area += 1;
+        for d in [Up, Left, Down, Right] {
+            let next = pt + d;
+            if griddy.check(&next) && griddy[&next] == griddy[&pt] {
+                stack.push(next);
             } else {
                 perimeter += 1;
             }
@@ -52,11 +92,6 @@ pub fn grow(griddy: &Griddy<char>, pt: Pt, visited: &mut HashSet<Pt>) -> (usize,
     }
     (area, perimeter)
 }
-
-pub fn partb(griddy: &Griddy<char>) -> String {
-    "todo".to_string()
-}
-
 pub fn input() -> Griddy<char> {
     Griddy::new(parse_chars(FILE))
 }
@@ -71,7 +106,8 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let griddy = input();
-        println!("{}", parta(&griddy));
+        let mut griddy = input();
+        let ans = partb(&mut griddy);
+        println!("{}", griddy);
     }
 }
