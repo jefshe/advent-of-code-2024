@@ -1,7 +1,10 @@
+use std::collections::HashSet;
+
 use super::*;
-use crate::{griddy::Griddy, util::*};
+use crate::util::D::*;
+use crate::{griddy::Griddy, point::Pt, util::*};
 use color_eyre::Result;
-const FILE: &str = "day12_ex";
+const FILE: &str = "day12";
 
 async fn run(mut tx: ItemTX) -> Result<()> {
     let griddy = input();
@@ -12,10 +15,44 @@ async fn run(mut tx: ItemTX) -> Result<()> {
 }
 
 pub fn parta(griddy: &Griddy<char>) -> String {
-    griddy.strings().join("\n");
-    println!("{:?}", griddy);
-    0.to_string()
+    let mut visited = HashSet::new();
+    // for pt in griddy.pts() {
+    //     let ans = grow(griddy, pt, &mut visited);
+    // }
+
+    format!(
+        "{}",
+        griddy
+            .pts()
+            .into_iter()
+            .map(|pt| grow(griddy, pt, &mut visited))
+            .map(|(area, perimeter)| area * perimeter)
+            .sum::<usize>()
+    )
 }
+
+pub fn grow(griddy: &Griddy<char>, pt: Pt, visited: &mut HashSet<Pt>) -> (usize, usize) {
+    let mut stack = vec![pt];
+    let mut area = 0;
+    let mut perimeter = 0;
+    while let Some(pt) = stack.pop() {
+        if visited.contains(&pt) {
+            continue;
+        }
+        visited.insert(pt);
+        area += 1;
+        for d in [Up, Down, Left, Right] {
+            let next = pt + d;
+            if griddy.check(&next) && griddy[&next] == griddy[&pt] {
+                stack.push(next);
+            } else {
+                perimeter += 1;
+            }
+        }
+    }
+    (area, perimeter)
+}
+
 pub fn partb(griddy: &Griddy<char>) -> String {
     "todo".to_string()
 }
@@ -30,11 +67,11 @@ pub fn wrapped_run(tx: ItemTX) -> BoxedAsync {
 
 #[cfg(test)]
 mod tests {
-    use super::input;
+    use super::*;
 
     #[test]
     fn it_works() {
         let griddy = input();
-        println!("{}", griddy);
+        println!("{}", parta(&griddy));
     }
 }

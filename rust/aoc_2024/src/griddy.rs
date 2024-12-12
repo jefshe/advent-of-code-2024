@@ -58,6 +58,10 @@ impl<T: Eq + ToString> Griddy<T> {
             .map(|i| self.to_xy(i))
     }
 
+    pub fn pts(&self) -> impl Iterator<Item = Pt> + use<'_, T> {
+        (0..self.width as i32).flat_map(move |x| (0..self.height as i32).map(move |y| Pt { x, y }))
+    }
+
     pub fn to_xy(&self, i: usize) -> XY {
         XY {
             x: i % self.width,
