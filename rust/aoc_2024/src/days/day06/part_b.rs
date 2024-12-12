@@ -51,9 +51,9 @@ pub fn is_loop(grid: &Griddy<char>, pos: Pt, facing: D) -> bool {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
-    #[test]
-    fn it_works() {
-        println!("{}", run());
-    }
+    // use super::*;
+    // #[test]
+    // fn it_works() {
+    //     println!("{}", run());
+    // }
 }

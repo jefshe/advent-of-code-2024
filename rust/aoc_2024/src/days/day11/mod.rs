@@ -64,14 +64,12 @@ pub fn blink(stone: usize, blinks: usize, cache: &mut Cache) -> usize {
 }
 
 pub fn input() -> Vec<usize> {
-    let mut vec = parse_lines_iter("day11")
+    parse_lines_iter("day11")
         .next()
         .unwrap()
         .split(" ")
         .map(|s| s.parse().expect("Invalid number"))
-        .collect::<Vec<usize>>();
-    vec.reserve(1_000_000);
-    vec
+        .collect::<Vec<usize>>()
 }
 
 pub fn wrapped_run(tx: ItemTX) -> BoxedAsync {

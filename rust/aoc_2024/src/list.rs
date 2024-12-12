@@ -14,6 +14,7 @@ impl Default for AOCList {
     fn default() -> Self {
         Self {
             items: vec![
+                AOCDay::new("Day 12", day12::wrapped_run),
                 AOCDay::new("Day 11", day11::wrapped_run),
                 AOCDay::new("Day 10", day10::wrapped_run),
                 AOCDay::new("Day 9", day09::wrapped_run),
@@ -22,7 +23,6 @@ impl Default for AOCList {
                 AOCDay::new("Day 6", day06::wrapped_run),
                 AOCDay::new("Day 5", day05::wrapped_run),
                 AOCDay::new("Day 4", day04::wrapped_run),
-                AOCDay::todo("Day 12"),
                 AOCDay::todo("Day 13"),
                 AOCDay::todo("Day 14"),
                 AOCDay::todo("Day 15"),
