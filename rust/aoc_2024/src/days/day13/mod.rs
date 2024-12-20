@@ -1,10 +1,11 @@
 use super::*;
 use crate::util::*;
 use color_eyre::Result;
+use good_lp::{constraint, default_solver, variables};
 use itertools::Itertools;
 const FILE: &str = "day13";
 
-type XY = (usize, usize);
+type XY = (f64, f64);
 #[derive(Debug)]
 struct Problem {
     a: XY,
@@ -20,6 +21,25 @@ async fn run(mut tx: ItemTX) -> Result<()> {
 }
 
 pub fn parta() -> String {
+    let problems = input();
+    for p in problems {
+        variables! {
+            vars:
+                0 <= a <=  100;
+                0 <= b <= 100;
+        }
+        let solution = vars
+            .minimise(3 * a + b)
+            .using(default_solver)
+            .with((a * p.a.0 + b * p.b.0).eq(p.prize.0))
+            // .with(constraint!())
+            // .with(constraint!(a * p.a.1 + b * p.b.1 = p.prize.1))
+            .solve();
+        if let Ok(s) = solution {
+            println!("a: {:?} and b {:?}", s.value(a), s.value(b))
+        }
+    }
+
     format!("{}", 0)
 }
 pub fn partb() -> String {
