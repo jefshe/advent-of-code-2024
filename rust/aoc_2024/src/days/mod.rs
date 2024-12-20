@@ -15,6 +15,7 @@ pub mod day09;
 pub mod day10;
 pub mod day11;
 pub mod day12;
+pub mod day13;
 
 pub type BoxedAsync = Pin<Box<dyn Future<Output = Result<()>> + Send>>;
 pub type ItemTX = (usize, TX);
